@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GlobalMining — Cloud Mining & Portfolio Portal</title>
+<style>
+:root{
+  --bg:#09090b;
+  --panel:#131317;
+  --line:#2b2b33;
+  --text:#f8fafc;
+  --muted:#b4b4be;
+  --gold:#facc15;
+  --gold-soft:rgba(250,204,21,.14);
+  --green:#22c55e;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --tg:#38bdf8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:radial-gradient(circle at 85% 8%, rgba(250,204,21,.08), transparent 45%), var(--bg);
+  color:var(--text);
+  font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+button:disabled{opacity:.55;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{
+  outline:3px solid var(--gold);
+  outline-offset:2px;
+}
+
+.company-header{
+  position:sticky;top:0;z-index:25;
+  background:#0a0a0d;border-bottom:1px solid rgba(250,204,21,.35);
+  padding:12px 18px;
+}
+.header-inner{
+  max-width:1480px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:19px}
+.logo{
+  width:36px;height:36px;border-radius:10px;flex:0 0 36px;
+  background:linear-gradient(135deg,var(--gold),#f59e0b);
+  display:grid;place-items:center;color:#09090b;font-weight:900;
+}
+.clients-pill{
+  background:rgba(250,204,21,.14);border:1px solid rgba(250,204,21,.35);
+  color:#fef9c3;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;
+}
+.sync-pill{
+  background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.4);
+  color:#86efac;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;
+}
+.sync-pill.warn{
+  background:rgba(245,158,11,.16);border-color:rgba(245,158,11,.45);color:#fde047;
+}
+
+.quick-nav{
+  max-width:1480px;margin:12px auto 0;padding:0 16px;width:100%;
+  display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;padding-bottom:4px;
+}
+.nav-link{
+  background:#15151b;color:#e4e4e7;border:1px solid var(--line);
+  padding:6px 11px;border-radius:8px;font-size:12px;font-weight:700;
+  text-decoration:none;white-space:nowrap;flex:0 0 auto;
+}
+.nav-link:hover{border-color:var(--gold);color:var(--gold)}
+
+.portal-shell{
+  max-width:1480px;margin:0 auto;padding:14px 16px 28px;flex:1;width:100%;
+  display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:16px;align-items:start;
+}
+.main-col{min-width:0}
+
+.coin-sidebar{
+  position:sticky;top:76px;
+  background:var(--panel);border:1px solid rgba(250,204,21,.35);border-radius:14px;
+  padding:14px;min-width:0;
+}
+.coin-sidebar-head{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px;
+}
+.coin-stream-window{
+  height:270px;overflow:hidden;position:relative;
+  border:1px solid #24242d;border-radius:10px;background:#0c0c10;padding:8px;
+}
+.coin-stream-track{
+  display:flex;flex-direction:column;gap:8px;
+  animation:coinScroll 18s linear infinite;
+}
+.coin-stream-window:hover .coin-stream-track{animation-play-state:paused}
+@keyframes coinScroll{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(-50%)}
+}
+.coin-row{
+  background:#14141a;border:1px solid #262630;border-radius:9px;
+  padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.coin-sym{font-weight:800;font-size:13px;color:var(--gold)}
+.coin-px{font-weight:800;font-size:13px;color:#fff;text-align:right}
+.coin-chg{font-size:11px;font-weight:700;text-align:right}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.grid{display:grid;gap:14px}
+.stats-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.plans-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+.stat-val{font-size:21px;font-weight:800;color:var(--gold);margin-top:4px;overflow-wrap:anywhere}
+.small{font-size:12px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:8px;background:linear-gradient(100deg,var(--gold),#f59e0b);color:#09090b;font-weight:800;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn.secondary{background:#1d1d24;color:#fef08a;border:1px solid var(--line)}
+.btn.ok{background:rgba(34,197,94,.22);color:#86efac;border:1px solid rgba(34,197,94,.45)}
+.btn.tg{background:rgba(56,189,248,.18);color:#bae6fd;border:1px solid rgba(56,189,248,.48)}
+.btn.tg:hover{border-color:var(--tg);color:#fff}
+input,select,textarea{background:#0c0c10;border:1px solid #353542;color:#fff;padding:10px;border-radius:8px;width:100%;min-width:0}
+textarea{min-height:68px;resize:vertical}
+.field{display:grid;gap:5px;margin-bottom:10px;min-width:0}
+.field label{font-size:12px;color:#e4e4e7;font-weight:600}
+
+.tg-badge{
+  width:42px;height:42px;border-radius:12px;flex:0 0 42px;
+  background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.38);
+  display:grid;place-items:center;color:var(--tg);
+}
+.tg-icon{width:18px;height:18px;display:block;flex:0 0 auto}
+.auth-tg-strip{
+  margin-top:12px;padding:11px 13px;border-radius:10px;
+  background:#0e1217;border:1px solid rgba(56,189,248,.35);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+
+.auth-wrap{max-width:520px;margin:12px auto 18px}
+.auth-box{margin-bottom:12px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.auth-tab{padding:10px;border-radius:8px;font-weight:800;font-size:13px;background:#1a1a22;color:#d4d4d8;border:1px solid var(--line)}
+.auth-tab.active{background:linear-gradient(100deg,var(--gold),#f59e0b);color:#09090b;border-color:var(--gold)}
+
+.auth-err{
+  display:none;margin-bottom:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;font-weight:600;
+  background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.45);color:#fca5a5;
+}
+.auth-ok{
+  display:none;margin-bottom:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;font-weight:600;
+  background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.45);color:#86efac;
+}
+
+.signup-banner{
+  background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.4);
+  border-radius:10px;padding:11px 13px;margin-bottom:14px;
+}
+
+.captcha-row{display:flex;align-items:center;gap:10px}
+.captcha-canvas{
+  background:#09090c;border:1px solid rgba(250,204,21,.5);
+  border-radius:8px;display:block;
+}
+
+.plan-card{
+  background:#0f0f14;border:1px solid var(--line);border-radius:12px;
+  padding:15px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-width:0;
+  transition:border-color .15s ease, transform .15s ease;
+}
+.plan-card.selected{
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px rgba(250,204,21,.45);
+  background:#14141b;
+}
+.plan-card.active{border-color:var(--green)}
+.plan-price{font-size:21px;font-weight:900;color:#fff}
+.plan-roi{font-size:14.5px;font-weight:800;color:var(--green)}
+.tag{font-size:10.5px;color:var(--gold);background:var(--gold-soft);border:1px solid rgba(250,204,21,.32);padding:4px 9px;border-radius:20px;font-weight:700;display:inline-block}
+
+.buy-plan-bar{
+  margin-top:14px;padding:12px 14px;border-radius:12px;
+  background:#0e0e13;border:1px solid rgba(250,204,21,.35);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+
+.item{border-bottom:1px solid #24242c;padding:10px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.item:last-child{border-bottom:0}
+.pill{font-size:11px;padding:4px 9px;border-radius:20px;font-weight:700;background:rgba(250,204,21,.16);color:#fde047;display:inline-block}
+.pill.ok{background:rgba(34,197,94,.18);color:#86efac}
+.pill.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+
+.wallet-box{background:#0c0c10;border:1px solid rgba(250,204,21,.35);border-radius:8px;padding:10px;font-family:monospace;font-size:12px;color:#fef08a;word-break:break-all;flex:1}
+.ref-box{background:#0c0c10;border:1px dashed rgba(250,204,21,.45);border-radius:8px;padding:10px;font-family:monospace;font-size:13px;color:var(--gold);word-break:break-all;flex:1}
+.copy-row{display:flex;align-items:stretch;gap:8px}
+.req-note{font-size:12px;color:#fca5a5;margin-top:6px;display:none;font-weight:600}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:35;padding:12px;overflow:auto}
+.modal-box{background:var(--panel);border:1px solid rgba(250,204,21,.4);border-radius:16px;max-width:520px;width:100%;padding:20px;margin:auto;max-height:90vh;overflow:auto}
+.toast{position:fixed;right:16px;bottom:16px;left:16px;max-width:420px;margin-left:auto;background:#191812;border:1px solid var(--gold);color:#fef9c3;padding:11px 14px;border-radius:10px;display:none;z-index:45;font-weight:600;font-size:13px}
+
+.site-footer{background:#0a0a0d;border-top:1px solid rgba(250,204,21,.3);padding:16px 20px;margin-top:auto}
+.footer-bottom{max-width:1480px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted)}
+
+@media(max-width:1150px){
+  .portal-shell{grid-template-columns:minmax(0,1fr)}
+  .coin-sidebar{position:static}
+  .coin-stream-window{height:auto;max-height:220px;overflow-y:auto}
+  .coin-stream-track{animation:none}
+}
+@media(max-width:1100px){
+  .stats-5{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1050px){
+  .plans-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  .stats-5,.cols-2,.plans-grid{grid-template-columns:minmax(0,1fr)}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="company-header" role="banner" aria-label="GlobalMining Header">
+ <div class="header-inner">
+  <div class="brand">
+   <div class="logo" aria-hidden="true">G</div>
+   <div>
+    <div>GlobalMining <span class="tag" style="vertical-align:middle">MEMBER</span></div>
+    <div class="small" style="color:var(--gold)" id="userLiveRatesHeader">BTC • ETH • DOGE • USDT • SOL</div>
+   </div>
+  </div>
+  <div class="row" id="authHeaderControls"></div>
+ </div>
+</header>
+
+<nav class="quick-nav" aria-label="Quick Navigation">
+ <a href="#sec-auth" id="navAuthLink" class="nav-link">Login / Sign Up</a>
+ <a href="#sec-plans" class="nav-link">Mining Plans</a>
+ <a href="#sec-telegram" class="nav-link">Telegram Channel</a>
+ <a href="#sec-withdraw" class="nav-link">Withdraw Funds</a>
+ <a href="#sec-referral" class="nav-link">Referral ($5)</a>
+ <a href="#sec-support" class="nav-link">Help & Support</a>
+ <a href="#sec-about" class="nav-link">About Us</a>
+ <a href="#sec-privacy" class="nav-link">Privacy Policy</a>
+</nav>
+
+<div class="portal-shell">
+ <main class="main-col" role="main" aria-label="GlobalMining Portal">
+
+  <div id="sec-auth" class="auth-wrap">
+   <section class="card auth-box" aria-label="Login and Sign Up">
+    <div class="auth-tabs" role="tablist">
+     <button type="button" id="tabLoginBtn" class="auth-tab active" role="tab" aria-selected="true" onclick="switchAuthView('login')">Login Page</button>
+     <button type="button" id="tabSignupBtn" class="auth-tab" role="tab" aria-selected="false" onclick="switchAuthView('signup')">Sign Up Page ($10 Bonus)</button>
+    </div>
+
+    <div id="authErrBox" class="auth-err" role="alert"></div>
+    <div id="authOkBox" class="auth-ok" role="status"></div>
+
+    <div id="loginPageView">
+     <h1 style="margin:0 0 6px;font-size:20px;color:var(--gold)">Member Login</h1>
+     <p class="small" style="margin:0 0 12px">Sign in with your registered email and password. New users must register on the Sign Up page first.</p>
+     <div class="field">
+      <label for="loginEmail">Registered Email *</label>
+      <input id="loginEmail" type="email" placeholder="Enter your email address" autocomplete="email" onkeydown="if(event.key==='Enter')submitLogin()">
+     </div>
+     <div class="field" style="margin-bottom:4px">
+      <label for="loginPassword">Password *</label>
+      <div class="copy-row">
+       <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitLogin()">
+       <button type="button" class="btn secondary" style="padding:0 11px;font-size:12px" onclick="togglePassVis('loginPassword',this)">Show</button>
+      </div>
+     </div>
+     <div style="text-align:right;margin-bottom:10px">
+      <button type="button" style="background:none;color:var(--gold);font-size:12px;font-weight:700;padding:0;text-decoration:underline" onclick="switchAuthView('forgot')">Forgot Password?</button>
+     </div>
+     <button type="button" class="btn" style="width:100%;margin-top:4px" onclick="submitLogin()">Login To Dashboard</button>
+     <div class="small" style="margin-top:10px;text-align:center">
+      <span>Don't have an account?</span>
+      <button type="button" style="background:none;color:var(--gold);font-weight:800;padding:0;text-decoration:underline" onclick="switchAuthView('signup')">Sign Up Here ($10 Bonus)</button>
+     </div>
+    </div>
+
+    <div id="signupPageView" style="display:none">
+     <div class="row" style="margin-bottom:6px">
+      <h1 style="margin:0;font-size:20px;color:var(--gold)">Create New Account (Sign Up)</h1>
+      <span class="pill ok">$10 SIGN-UP BONUS</span>
+     </div>
+
+     <div class="signup-banner">
+      <div style="font-weight:800;color:var(--gold);font-size:14px">Get $10.00 USD Instant Sign-Up Bonus!</div>
+      <div class="small" style="color:#fef9c3;margin-top:2px">Receive $10.00 immediately upon registration and refer friends for +$5.00 referral bonus, then log in with your credentials.</div>
+     </div>
+
+     <div class="field">
+      <label for="signupEmail">Email Address *</label>
+      <input id="signupEmail" type="email" placeholder="Enter your email address" autocomplete="email">
+     </div>
+     <div class="field">
+      <label for="signupPassword">Create Password (min 6 chars) *</label>
+      <div class="copy-row">
+       <input id="signupPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password">
+       <button type="button" class="btn secondary" style="padding:0 11px;font-size:12px" onclick="togglePassVis('signupPassword',this)">Show</button>
+      </div>
+     </div>
+     <div class="field">
+      <label for="signupRefCode">Referral Code (Optional — Referrer +$5 Bonus)</label>
+      <input id="signupRefCode" type="text" placeholder="e.g. GM-123456">
+     </div>
+
+     <div class="field">
+      <label for="signupCaptchaInput">Security Captcha *</label>
+      <div class="captcha-row">
+       <canvas id="signupCaptchaCanvas" class="captcha-canvas" width="128" height="40" aria-label="Captcha image"></canvas>
+       <button type="button" class="btn secondary" style="width:auto" onclick="generateCaptcha()">New Code</button>
+      </div>
+      <input id="signupCaptchaInput" type="text" maxlength="6" placeholder="Type the code shown in the image" style="margin-top:6px" autocomplete="off" onkeydown="if(event.key==='Enter')submitSignup()">
+     </div>
+
+     <button type="button" class="btn ok" style="width:100%;margin-top:6px" onclick="submitSignup()">Complete Sign Up ($10 Bonus)</button>
+
+     <div class="auth-tg-strip">
+      <div style="display:flex;align-items:center;gap:9px">
+       <span style="color:var(--tg);display:inline-flex" aria-hidden="true">
+        <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor">
+         <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+        </svg>
+       </span>
+       <span class="small" style="color:#e0f2fe"><b>Join Telegram</b> for mining updates & announcements.</span>
+      </div>
+      <a href="#" data-tg-link="true" target="_blank" rel="noopener noreferrer" class="btn tg" style="padding:7px 11px;font-size:12px">
+       <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+       </svg>
+       <span>Join Telegram</span>
+      </a>
+     </div>
+
+     <div class="small" style="margin-top:10px;text-align:center">
+      <span>Already have an account?</span>
+      <button type="button" style="background:none;color:var(--gold);font-weight:800;padding:0;text-decoration:underline" onclick="switchAuthView('login')">Go To Login Page</button>
+     </div>
+    </div>
+
+    <div id="forgotPageView" style="display:none">
+     <h1 style="margin:0 0 6px;font-size:20px;color:var(--gold)">Reset Forgotten Password</h1>
+     <p class="small" style="margin:0 0 12px">Answer your account's security check and enter the verification code + captcha to set a new password.</p>
+
+     <div class="field">
+      <label for="forgotEmail">Registered Email *</label>
+      <div class="row" style="gap:8px">
+       <input id="forgotEmail" type="email" placeholder="Enter your registered email address" style="flex:1" autocomplete="email" onchange="loadForgotSecurityPrompt()" oninput="loadForgotSecurityPrompt()">
+       <button type="button" class="btn secondary" style="width:auto" onclick="sendForgotVerificationCode()">Send Code</button>
+      </div>
+      <div class="small" id="forgotSecurityQuestionText" style="color:#fef9c3;margin-top:4px"></div>
+      <div class="small" id="forgotCodeHint" style="color:var(--gold)"></div>
+     </div>
+     <div class="field">
+      <label for="forgotSecurityAnswer">Security Answer / Account Ref Code *</label>
+      <input id="forgotSecurityAnswer" type="text" placeholder="Enter your account's GM-XXXXXX referral code" autocomplete="off">
+     </div>
+     <div class="field">
+      <label for="forgotVerifyCode">6-Digit Verification Code *</label>
+      <input id="forgotVerifyCode" type="text" maxlength="6" placeholder="Enter 6-digit verification code" autocomplete="off">
+     </div>
+     <div class="field">
+      <label for="forgotNewPassword">New Password (min 6 chars) *</label>
+      <input id="forgotNewPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password">
+     </div>
+     <div class="field">
+      <label for="forgotConfirmPassword">Confirm New Password *</label>
+      <input id="forgotConfirmPassword" type="password" placeholder="Re-enter new password" autocomplete="new-password">
+     </div>
+     <div class="field">
+      <label for="forgotCaptchaInput">Security Captcha *</label>
+      <div class="captcha-row">
+       <canvas id="forgotCaptchaCanvas" class="captcha-canvas" width="128" height="40" aria-label="Forgot password captcha image"></canvas>
+       <button type="button" class="btn secondary" style="width:auto" onclick="generateForgotCaptcha()">New Code</button>
+      </div>
+      <input id="forgotCaptchaInput" type="text" maxlength="6" placeholder="Type the code shown in the image" style="margin-top:6px" autocomplete="off" onkeydown="if(event.key==='Enter')submitForgotPassword()">
+     </div>
+
+     <button type="button" class="btn ok" style="width:100%;margin-top:6px" onclick="submitForgotPassword()">Reset Password & Go To Login</button>
+     <div class="small" style="margin-top:10px;text-align:center">
+      <button type="button" style="background:none;color:var(--gold);font-weight:800;padding:0;text-decoration:underline" onclick="switchAuthView('login')">← Back to Login Page</button>
+     </div>
+    </div>
+   </section>
+
+   <section id="sec-telegram-guest" class="card" style="margin-bottom:0" aria-label="Join Telegram Channel">
+    <div class="row">
+     <div style="display:flex;align-items:center;gap:12px">
+      <div class="tg-badge" aria-hidden="true">
+       <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+       </svg>
+      </div>
+      <div>
+       <h2 style="margin:0;font-size:16px;color:var(--tg)">Join Telegram</h2>
+       <p class="small" style="margin:2px 0 0">Get mining updates, payout alerts, and announcements.</p>
+      </div>
+     </div>
+     <a href="#" data-tg-link="true" target="_blank" rel="noopener noreferrer" class="btn tg">
+      <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+       <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+      </svg>
+      <span>Join Telegram</span>
+     </a>
+    </div>
+   </section>
+  </div>
+
+  <div id="userDashboard" style="display:none">
+   <div class="grid stats-5">
+    <div class="card" style="margin:0"><div class="small">Available Balance</div><div class="stat-val" id="uBalance">$0.00</div><div class="small" id="uPlanLabel">Plan: None (0% / mo)</div></div>
+    <div class="card" style="margin:0"><div class="small">Sign-Up Bonus</div><div class="stat-val" style="color:var(--gold)" id="uSignupBonus">$10.00</div><div class="small" id="uBonusWithdrawNote">Welcome Bonus</div></div>
+    <div class="card" style="margin:0"><div class="small">Profit + Bonus</div><div class="stat-val" style="color:var(--green)" id="uRewards">$0.00</div><div class="small" id="uRefBonusLabel">Ref Bonus: $0.00</div></div>
+    <div class="card" style="margin:0"><div class="small">Mining Hashrate</div><div class="stat-val" id="uHashrate">0 TH/s</div><div class="small" id="uContracts">0 Active Contracts</div></div>
+    <div class="card" style="margin:0"><div class="small">Account</div><div class="stat-val" style="font-size:15px;color:#fef9c3" id="uEmailDisplay">—</div><div class="small" id="uRefCodeDisplay">Ref Code: —</div></div>
+   </div>
+
+   <section id="sec-plans" class="card" style="margin-top:16px" aria-label="Mining Plans">
+    <div class="row" style="margin-bottom:10px">
+     <div>
+      <h2 style="margin:0;font-size:17px">Select Mining Plan & Buy</h2>
+      <p class="small" style="margin:2px 0 0">Select a plan below to show the Buy Plan option, then upload Transaction ID and transfer screenshot.</p>
+     </div>
+     <span class="tag">5% • 10% • 15% • 20%</span>
+    </div>
+    <div class="grid plans-grid">
+     <div class="plan-card" id="planCard_BRONZE" onclick="selectPlan('BRONZE',199,5)">
+      <div><span class="tag">BRONZE</span><div class="plan-price" style="margin-top:6px">$199</div><div class="plan-roi">5% / Month</div><div class="small">Est. Monthly Profit: <b>$9.95</b></div></div>
+      <div class="row" style="gap:6px">
+       <button type="button" class="btn secondary" style="flex:1" onclick="event.stopPropagation();selectPlan('BRONZE',199,5)">Select</button>
+       <button type="button" class="btn" id="buyBtn_BRONZE" style="flex:1;display:none" onclick="event.stopPropagation();openPlanPaymentModal('BRONZE',199,5)">Buy Plan</button>
+      </div>
+     </div>
+     <div class="plan-card" id="planCard_SILVER" onclick="selectPlan('SILVER',499,10)">
+      <div><span class="tag">SILVER</span><div class="plan-price" style="margin-top:6px">$499</div><div class="plan-roi">10% / Month</div><div class="small">Est. Monthly Profit: <b>$49.90</b></div></div>
+      <div class="row" style="gap:6px">
+       <button type="button" class="btn secondary" style="flex:1" onclick="event.stopPropagation();selectPlan('SILVER',499,10)">Select</button>
+       <button type="button" class="btn" id="buyBtn_SILVER" style="flex:1;display:none" onclick="event.stopPropagation();openPlanPaymentModal('SILVER',499,10)">Buy Plan</button>
+      </div>
+     </div>
+     <div class="plan-card" id="planCard_GOLD" onclick="selectPlan('GOLD',799,15)">
+      <div><span class="tag">GOLD</span><div class="plan-price" style="margin-top:6px">$799</div><div class="plan-roi">15% / Month</div><div class="small">Est. Monthly Profit: <b>$119.85</b></div></div>
+      <div class="row" style="gap:6px">
+       <button type="button" class="btn secondary" style="flex:1" onclick="event.stopPropagation();selectPlan('GOLD',799,15)">Select</button>
+       <button type="button" class="btn" id="buyBtn_GOLD" style="flex:1;display:none" onclick="event.stopPropagation();openPlanPaymentModal('GOLD',799,15)">Buy Plan</button>
+      </div>
+     </div>
+     <div class="plan-card" id="planCard_PLATINUM" onclick="selectPlan('PLATINUM',999,20)">
+      <div><span class="tag">PLATINUM</span><div class="plan-price" style="margin-top:6px">$999</div><div class="plan-roi">20% / Month</div><div class="small">Est. Monthly Profit: <b>$199.80</b></div></div>
+      <div class="row" style="gap:6px">
+       <button type="button" class="btn secondary" style="flex:1" onclick="event.stopPropagation();selectPlan('PLATINUM',999,20)">Select</button>
+       <button type="button" class="btn" id="buyBtn_PLATINUM" style="flex:1;display:none" onclick="event.stopPropagation();openPlanPaymentModal('PLATINUM',999,20)">Buy Plan</button>
+      </div>
+     </div>
+    </div>
+
+    <div id="selectedPlanBuyBar" class="buy-plan-bar" style="display:none">
+     <div>
+      <div style="font-weight:800;color:var(--gold)" id="selectedPlanSummary">Selected Plan: —</div>
+      <div class="small">Transaction ID + Transfer Screenshot required on next step.</div>
+     </div>
+     <button type="button" class="btn ok" id="barBuyPlanBtn" onclick="openSelectedPlanModal()">Buy Plan Now</button>
+    </div>
+   </section>
+
+   <section id="sec-telegram" class="card" style="margin-top:16px" aria-label="Telegram Channel">
+    <div class="row">
+     <div style="display:flex;align-items:center;gap:12px">
+      <div class="tg-badge" aria-hidden="true">
+       <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+       </svg>
+      </div>
+      <div>
+       <h2 style="margin:0;font-size:17px;color:var(--tg)">Official Telegram Channel</h2>
+       <p class="small" style="margin:2px 0 0">Join our official Telegram channel for mining updates, payout alerts, and announcements.</p>
+      </div>
+     </div>
+     <div class="row" style="gap:8px">
+      <a href="#" data-tg-link="true" target="_blank" rel="noopener noreferrer" class="btn tg">
+       <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+       </svg>
+       <span>Join Telegram</span>
+      </a>
+     </div>
+    </div>
+   </section>
+
+   <div class="grid cols-2">
+    <section id="sec-withdraw" class="card" aria-label="Withdraw Funds">
+     <h2 style="margin:0 0 6px;font-size:17px">Withdraw Funds</h2>
+     <p class="small" style="margin:0 0 12px" id="wdEligibleText">Enter a valid destination address for the selected chain. Sign-up bonus unlocks after an approved plan.</p>
+     <div class="field"><label for="wdAmount">Withdrawal Amount ($ USD, min $10)</label><input id="wdAmount" type="number" step="0.01" min="10" placeholder="Min $10.00"></div>
+     <div class="field">
+      <label for="wdNetwork">Chain / Network</label>
+      <select id="wdNetwork">
+       <option value="USDT.TRC20">USDT.TRC20</option>
+       <option value="USDT.BEP20">USDT.BEP20</option>
+       <option value="USDT.ERC20">USDT.ERC20</option>
+       <option value="BTC">BTC</option>
+       <option value="ETH">ETH</option>
+       <option value="DOGE">DOGE</option>
+       <option value="SOL">SOL</option>
+      </select>
+     </div>
+     <div class="field"><label for="wdAddress">Destination Wallet Address</label><input id="wdAddress" type="text" placeholder="Paste destination wallet address"></div>
+     <div class="field"><label for="wdFeeProof">Miner Fee TX Hash or Proof (Required for Fee Paid option)</label><input id="wdFeeProof" type="text" placeholder="Enter fee TX hash or reference"></div>
+     <div class="row" style="margin-top:8px">
+      <button type="button" class="btn" style="flex:1" onclick="submitWithdrawal(false)">Request Withdrawal</button>
+      <button type="button" class="btn secondary" style="flex:1" onclick="submitWithdrawal(true)">Confirm Miner Fee Paid</button>
+     </div>
+    </section>
+
+    <section id="sec-referral" class="card" aria-label="Referral Program">
+     <h2 style="margin:0 0 6px;font-size:17px">Referral Program ($5 Bonus)</h2>
+     <p class="small" style="margin:0 0 12px">Share your code to earn $5 when a referred friend activates a mining plan.</p>
+     <div class="field">
+      <label>Your Referral Code</label>
+      <div class="copy-row">
+       <div class="ref-box" id="uReferralCodeBox">—</div>
+       <button type="button" class="btn secondary" onclick="copyTextFromEl('uReferralCodeBox','Referral code copied!')">Copy</button>
+      </div>
+     </div>
+     <div class="small" id="uReferralCountText">Total Referrals: 0</div>
+     <div id="uReferralsList" style="margin-top:8px"></div>
+    </section>
+   </div>
+
+   <div class="grid cols-2">
+    <section id="sec-support" class="card" aria-label="Help and Support">
+     <h2 style="margin:0 0 10px;font-size:17px">Help & Support Ticket</h2>
+     <div class="field">
+      <label for="tktCategory">Category</label>
+      <select id="tktCategory">
+       <option value="Plan Payment">Plan Payment</option>
+       <option value="Withdrawal">Withdrawal</option>
+       <option value="Referral Bonus">Referral Bonus</option>
+       <option value="Account & Profile">Account & Profile</option>
+      </select>
+     </div>
+     <div class="field"><label for="tktSubject">Subject</label><input id="tktSubject" type="text" placeholder="Short subject"></div>
+     <div class="field"><label for="tktMessage">Message</label><textarea id="tktMessage" placeholder="Describe your query..."></textarea></div>
+     <div class="field"><label for="tktScreenshot">Screenshot (Optional, max 1.5 MB)</label><input id="tktScreenshot" type="file" accept="image/*"></div>
+     <button type="button" class="btn" style="width:100%" onclick="submitTicket()">Submit Ticket</button>
+     <div id="uTicketsList" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card" aria-label="My Activity">
+     <h2 style="margin:0 0 10px;font-size:17px">My Payments, Plans & Withdrawals</h2>
+     <div id="uActivePlansList"></div>
+     <div id="uPaymentsList" style="margin-top:10px"></div>
+     <div id="uWithdrawalsList" style="margin-top:10px"></div>
+    </section>
+   </div>
+  </div>
+
+  <div class="grid cols-2">
+   <section id="sec-about" class="card" aria-label="About Us">
+    <div class="row" style="margin-bottom:8px">
+     <h2 style="margin:0;font-size:17px;color:var(--gold)">About Us — GlobalMining</h2>
+     <span class="tag">ABOUT US</span>
+    </div>
+    <p class="small">GlobalMining provides structured cloud mining plans across Bronze (5%/mo), Silver (10%/mo), Gold (15%/mo), and Platinum (20%/mo) tiers with multi-chain settlement support across BTC, USDT (TRC20/BEP20/ERC20), ETH, DOGE, and SOL.</p>
+    <p class="small" style="margin-bottom:0">New members receive a $10.00 USD sign-up bonus upon account creation and can invite friends for a +$5.00 referral reward once a referred friend activates a plan.</p>
+   </section>
+
+   <section id="sec-privacy" class="card" aria-label="Privacy Policy">
+    <div class="row" style="margin-bottom:8px">
+     <h2 style="margin:0;font-size:17px;color:var(--gold)">Privacy Policy & Terms</h2>
+     <span class="tag">PRIVACY POLICY</span>
+    </div>
+    <p class="small">We protect account credentials, selected plans, transaction hashes, withdrawal details, and support tickets used to operate your portfolio and verification workflow.</p>
+    <p class="small" style="margin-bottom:0">Blockchain transfers are final once broadcast. Always verify the selected network and destination address before submitting payments or withdrawals.</p>
+   </section>
+  </div>
+ </main>
+
+ <aside class="coin-sidebar" aria-label="Live Coin Prices Sidebar">
+  <div class="coin-sidebar-head">
+   <div>
+    <div style="font-weight:800;font-size:14px;color:var(--gold)">Live Coin Prices</div>
+    <div class="small" id="coinSyncCountdown">Auto-sync: 60s</div>
+   </div>
+   <button type="button" class="btn secondary" style="padding:5px 9px;font-size:11px" onclick="refreshCoinPricesNow()">Sync</button>
+  </div>
+  <div class="coin-stream-window" aria-live="polite">
+   <div class="coin-stream-track" id="userCoinStreamTrack"></div>
+  </div>
+  <div class="small" id="coinLastUpdatedLabel" style="margin-top:8px;text-align:center">Updating prices...</div>
+ </aside>
+</div>
+
+<footer class="site-footer" role="contentinfo">
+ <div class="footer-bottom">
+  <span id="footerYear">© GlobalMining Inc. Cloud Mining Portal.</span>
+  <span>$10 Sign-Up Bonus • 60s Live Coin Feed • About Us • Privacy Policy</span>
+ </div>
+</footer>
+
+<div class="modal-bg" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payModalTitle">
+ <div class="modal-box">
+  <div class="row" style="margin-bottom:8px">
+   <h2 style="margin:0;color:var(--gold);font-size:18px" id="payModalTitle">Complete Plan Payment</h2>
+   <button type="button" class="btn secondary" onclick="closePayModal()">✕</button>
+  </div>
+  <p class="small" id="payModalDesc" style="margin:0 0 10px"></p>
+  <div class="field">
+   <label for="payNetworkSelect">Select Chain / Network *</label>
+   <select id="payNetworkSelect" onchange="updatePayWalletBox()">
+    <option value="USDT.TRC20">USDT.TRC20</option>
+    <option value="USDT.BEP20">USDT.BEP20</option>
+    <option value="USDT.ERC20">USDT.ERC20</option>
+    <option value="BTC">BTC</option>
+    <option value="ETH">ETH</option>
+    <option value="DOGE">DOGE</option>
+    <option value="SOL">SOL</option>
+   </select>
+  </div>
+  <div class="field">
+   <label>Deposit Wallet Address</label>
+   <div class="copy-row">
+    <div class="wallet-box" id="payWalletAddress">—</div>
+    <button type="button" class="btn secondary" onclick="copyTextFromEl('payWalletAddress','Deposit address copied!')">Copy</button>
+   </div>
+  </div>
+  <div class="field">
+   <label for="payTxInput">Transaction ID / TX Hash *</label>
+   <input id="payTxInput" type="text" required placeholder="Enter unique Transaction ID / TX hash">
+  </div>
+  <div class="field">
+   <label for="payScreenshotInput">Payment Proof Screenshot * (Image, max 1.5 MB)</label>
+   <input id="payScreenshotInput" type="file" accept="image/*" required onchange="previewPayScreenshot()">
+   <div class="small" id="paySsFileName">No screenshot selected yet.</div>
+   <img id="paySsPreview" alt="Payment proof preview" style="display:none;max-width:100%;max-height:140px;border-radius:8px;border:1px solid var(--line);margin-top:6px">
+  </div>
+  <div id="payReqErr" class="req-note" role="alert">Please upload payment proof</div>
+  <button type="button" class="btn" id="submitPayBtn" style="width:100%;margin-top:8px" onclick="submitPlanPayment()">Submit Payment For Verification</button>
+ </div>
+</div>
+
+<div class="modal-bg" id="imgModal" role="dialog" aria-modal="true" aria-label="Image Preview">
+ <div class="modal-box" style="max-width:700px;text-align:center">
+  <div class="row" style="margin-bottom:8px">
+   <h2 style="margin:0;color:var(--gold);font-size:16px">Image Preview</h2>
+   <button type="button" class="btn secondary" onclick="document.getElementById('imgModal').style.display='none'">✕</button>
+  </div>
+  <img id="imgModalSrc" style="max-width:100%;max-height:70vh;border-radius:10px;border:1px solid var(--line)" alt="Full preview">
+ </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DB_KEY = 'globalmining_db_v2';
+const SYNC_CHANNEL_NAME = 'globalmining_sync_v2';
+const SESSION_KEY = 'globalmining_active_session_v2';
+const SIGNUP_BONUS_USD = 10;
+const REFERRAL_BONUS_USD = 5;
+const MIN_WITHDRAW_USD = 10;
+const MAX_IMG_BYTES = 1.5 * 1024 * 1024;
+const IS_FILE_PROTOCOL = window.location.protocol === 'file:';
+
+let selectedPlan = null;
+let pendingPlan = null;
+let memSession = '';
+let currentCaptcha = '';
+let currentForgotCaptcha = '';
+let forgotOtpState = { email: '', code: '', expiresAt: 0 };
+let secondsRemaining = 60;
+let coinRefreshInProgress = false;
+let isSubmittingPayment = false;
+let isOfflineCoinFeed = false;
+let loginFailTracker = { count: 0, lockedUntil: 0 };
+
+const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel(SYNC_CHANNEL_NAME) : null;
+if (syncChannel) {
+  syncChannel.onmessage = () => renderUser();
+}
+window.addEventListener('storage', e => {
+  if (!e.key || e.key === DB_KEY) {
+    renderUser();
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) renderUser();
+});
+
+let latestCoins = [
+  { sym: 'BTC', name: 'Bitcoin', price: 94250.00, chg: 1.85 },
+  { sym: 'ETH', name: 'Ethereum', price: 3240.00, chg: 1.12 },
+  { sym: 'USDT', name: 'Tether', price: 1.00, chg: 0.01 },
+  { sym: 'DOGE', name: 'Dogecoin', price: 0.4125, chg: -0.64 },
+  { sym: 'SOL', name: 'Solana', price: 218.40, chg: 2.34 }
+];
+
+const defaultDB = {
+  telegramChannelUrl: '',
+  wallets: {
+    BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    USDT_BEP20: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    USDT_ERC20: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    USDT_TRC20: 'TNPeeaaFB7K9cmo4uQpcU32zGK8G1NYqeL',
+    ETH: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    DOGE: 'D8vFz4p1L37jdg9xYQ9sA1B2C3D4E5F6G7',
+    SOL: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'
+  },
+  users: {}
+};
+
+function cloneObj(o) { return JSON.parse(JSON.stringify(o)); }
+
+function getDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    const db = raw ? JSON.parse(raw) : cloneObj(defaultDB);
+    if (!db.users || typeof db.users !== 'object') db.users = {};
+    if (!db.wallets || typeof db.wallets !== 'object') db.wallets = cloneObj(defaultDB.wallets);
+    if (typeof db.telegramChannelUrl !== 'string') db.telegramChannelUrl = '';
+    return db;
+  } catch (e) {
+    return cloneObj(defaultDB);
+  }
+}
+
+function saveDB(db) {
+  try {
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    if (syncChannel) syncChannel.postMessage({ type: 'DB_UPDATED', ts: Date.now() });
+    return true;
+  } catch (e) {
+    toast('Browser storage full. Delete old entries or use smaller images (< 400 KB).');
+    return false;
+  }
+}
+
+function generateSecureSalt(len) {
+  const arr = new Uint8Array(len || 16);
+  if (crypto && crypto.getRandomValues) {
+    crypto.getRandomValues(arr);
+  } else {
+    for (let i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 256);
+  }
+  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPassword(password, salt) {
+  const data = new TextEncoder().encode(`${salt}:${password}`);
+  if (crypto && crypto.subtle && crypto.subtle.digest) {
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return `sha256$${salt}$${hex}`;
+  }
+  let hash = 0;
+  const combined = `${salt}:${password}`;
+  for (let i = 0; i < combined.length; i++) {
+    hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+    hash |= 0;
+  }
+  return `djb2$${salt}$${hash}`;
+}
+
+async function verifyPassword(password, storedHash) {
+  if (!storedHash) return false;
+  const parts = String(storedHash).split('$');
+  const salt = parts[1] || '';
+  const computed = await hashPassword(password, salt);
+  return computed === storedHash;
+}
+
+function getAuthenticatedEmail() {
+  const db = getDB();
+  let candidate = memSession;
+  try {
+    if (!candidate) candidate = sessionStorage.getItem(SESSION_KEY) || '';
+  } catch (e) {}
+  if (!candidate || !db.users[candidate] || !db.users[candidate].passwordHash) {
+    return '';
+  }
+  memSession = candidate;
+  return candidate;
+}
+
+function setAuthenticatedEmail(email) {
+  memSession = email || '';
+  try {
+    if (email) sessionStorage.setItem(SESSION_KEY, email);
+    else sessionStorage.removeItem(SESSION_KEY);
+  } catch (e) {}
+}
+
+function togglePassVis(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  const isPass = inp.type === 'password';
+  inp.type = isPass ? 'text' : 'password';
+  if (btn) btn.textContent = isPass ? 'Hide' : 'Show';
+}
+
+async function copyTextFromEl(elId, successMsg) {
+  const el = document.getElementById(elId);
+  const txt = el ? el.textContent.trim() : '';
+  if (!txt || txt === '—') return toast('Nothing to copy.');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(txt);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    toast(successMsg || 'Copied!');
+  } catch (e) {
+    toast('Copy failed — please copy manually.');
+  }
+}
+
+function money(n) {
+  return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
+}
+
+function showAuthErr(msg) {
+  const errEl = document.getElementById('authErrBox');
+  const okEl = document.getElementById('authOkBox');
+  if (okEl) okEl.style.display = 'none';
+  if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+  toast(msg);
+}
+
+function showAuthOk(msg) {
+  const errEl = document.getElementById('authErrBox');
+  const okEl = document.getElementById('authOkBox');
+  if (errEl) errEl.style.display = 'none';
+  if (okEl) { okEl.textContent = msg; okEl.style.display = 'block'; }
+  toast(msg);
+}
+
+function clearAuthNotices() {
+  const errEl = document.getElementById('authErrBox');
+  const okEl = document.getElementById('authOkBox');
+  if (errEl) errEl.style.display = 'none';
+  if (okEl) okEl.style.display = 'none';
+}
+
+function drawCaptchaToCanvas(canvasId, code) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#09090c';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < 5; i++) {
+    ctx.strokeStyle = i % 2 === 0 ? 'rgba(250,204,21,.22)' : 'rgba(148,163,184,.22)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+    ctx.stroke();
+  }
+
+  ctx.font = '900 20px monospace';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < code.length; i++) {
+    ctx.save();
+    const x = 18 + i * 24;
+    const y = canvas.height / 2 + ((Math.random() - 0.5) * 6);
+    const angle = (Math.random() - 0.5) * 0.28;
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#facc15';
+    ctx.fillText(code[i], -6, 0);
+    ctx.restore();
+  }
+}
+
+function generateCaptcha() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  currentCaptcha = code;
+  drawCaptchaToCanvas('signupCaptchaCanvas', code);
+  const inp = document.getElementById('signupCaptchaInput');
+  if (inp) inp.value = '';
+}
+
+function generateForgotCaptcha() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  currentForgotCaptcha = code;
+  drawCaptchaToCanvas('forgotCaptchaCanvas', code);
+  const inp = document.getElementById('forgotCaptchaInput');
+  if (inp) inp.value = '';
+}
+
+function loadForgotSecurityPrompt() {
+  const email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  const qEl = document.getElementById('forgotSecurityQuestionText');
+  if (!qEl) return;
+  if (!email || !email.includes('@')) {
+    qEl.textContent = '';
+    return;
+  }
+  const db = getDB();
+  if (!db.users[email]) {
+    qEl.textContent = 'No registered account found for this email.';
+    return;
+  }
+  qEl.textContent = "Security Check: Enter your account's assigned referral code (format GM-XXXXXX).";
+}
+
+function switchAuthView(view, shouldScroll = false) {
+  clearAuthNotices();
+  const isSignup = view === 'signup';
+  const isForgot = view === 'forgot';
+  const isLogin = !isSignup && !isForgot;
+
+  document.getElementById('loginPageView').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('signupPageView').style.display = isSignup ? 'block' : 'none';
+  const forgotEl = document.getElementById('forgotPageView');
+  if (forgotEl) forgotEl.style.display = isForgot ? 'block' : 'none';
+
+  document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
+  document.getElementById('tabLoginBtn').setAttribute('aria-selected', String(isLogin));
+  document.getElementById('tabSignupBtn').classList.toggle('active', isSignup);
+  document.getElementById('tabSignupBtn').setAttribute('aria-selected', String(isSignup));
+
+  if (isSignup) generateCaptcha();
+  if (isForgot) {
+    const loginMail = (document.getElementById('loginEmail').value || '').trim();
+    if (loginMail && !document.getElementById('forgotEmail').value) {
+      document.getElementById('forgotEmail').value = loginMail;
+    }
+    loadForgotSecurityPrompt();
+    generateForgotCaptcha();
+  }
+  if (shouldScroll) {
+    const authSec = document.getElementById('sec-auth');
+    if (authSec) authSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function sendForgotVerificationCode() {
+  const email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  const hint = document.getElementById('forgotCodeHint');
+  if (!email || !email.includes('@')) {
+    return showAuthErr('Enter a valid registered email first.');
+  }
+  const db = getDB();
+  if (!db.users[email]) {
+    return showAuthErr('No account found with this email.');
+  }
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  forgotOtpState = { email, code, expiresAt: Date.now() + 5 * 60 * 1000 };
+  if (hint) {
+    hint.textContent = `Verification Code: ${code} (valid 5 min).`;
+  }
+  toast('6-digit verification code generated.');
+}
+
+async function submitForgotPassword() {
+  clearAuthNotices();
+  const email = (document.getElementById('forgotEmail').value || '').trim().toLowerCase();
+  const secAns = (document.getElementById('forgotSecurityAnswer').value || '').trim().toUpperCase();
+  const otp = (document.getElementById('forgotVerifyCode').value || '').trim();
+  const newPass = (document.getElementById('forgotNewPassword').value || '');
+  const confirmPass = (document.getElementById('forgotConfirmPassword').value || '');
+  const captchaEntered = (document.getElementById('forgotCaptchaInput').value || '').trim().toUpperCase();
+
+  if (!email || !email.includes('@')) {
+    return showAuthErr('Please enter your registered email address.');
+  }
+  const db = getDB();
+  const existing = db.users[email];
+  if (!existing) {
+    generateForgotCaptcha();
+    return showAuthErr('No account found with this email address.');
+  }
+  if (!secAns || secAns !== String(existing.refCode || '').trim().toUpperCase()) {
+    generateForgotCaptcha();
+    return showAuthErr("Security verification failed. Enter your account's exact GM-XXXXXX referral code.");
+  }
+  if (!forgotOtpState.code || forgotOtpState.email !== email || Date.now() > forgotOtpState.expiresAt) {
+    return showAuthErr('Please click "Send Code" to generate a fresh verification code first.');
+  }
+  if (!otp || otp !== forgotOtpState.code) {
+    return showAuthErr('Invalid or expired 6-digit verification code.');
+  }
+  if (!newPass || newPass.length < 6) {
+    return showAuthErr('New password must be at least 6 characters long.');
+  }
+  if (newPass !== confirmPass) {
+    return showAuthErr('New password and Confirm password do not match.');
+  }
+  if (!captchaEntered || captchaEntered !== currentForgotCaptcha) {
+    generateForgotCaptcha();
+    return showAuthErr('Invalid captcha code.');
+  }
+
+  const salt = generateSecureSalt(16);
+  existing.passwordHash = await hashPassword(newPass, salt);
+  existing.events = existing.events || [];
+  existing.events.unshift({
+    type: 'Password Reset',
+    detail: 'Verified security check & code password update',
+    amount: '—',
+    status: 'Completed',
+    date: nowDateTimeStr()
+  });
+
+  if (!saveDB(db)) return;
+  forgotOtpState = { email: '', code: '', expiresAt: 0 };
+
+  document.getElementById('forgotSecurityAnswer').value = '';
+  document.getElementById('forgotVerifyCode').value = '';
+  document.getElementById('forgotNewPassword').value = '';
+  document.getElementById('forgotConfirmPassword').value = '';
+  document.getElementById('forgotCaptchaInput').value = '';
+  document.getElementById('forgotCodeHint').textContent = '';
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = '';
+
+  switchAuthView('login');
+  showAuthOk(`Password reset for ${email}. Please log in with your new password.`);
+}
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function nowDateTimeStr() {
+  return new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function newUniqueId(prefix) {
+  if (crypto && crypto.randomUUID) {
+    return `${prefix}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+function formatCoinPrice(c) {
+  const px = Number(c.price || 0);
+  if (c.sym === 'DOGE' || px < 1) return '$' + px.toFixed(4);
+  return money(px);
+}
+
+function renderCoinSidebar() {
+  const track = document.getElementById('userCoinStreamTrack');
+  const hdr = document.getElementById('userLiveRatesHeader');
+  const upd = document.getElementById('coinLastUpdatedLabel');
+  if (!track) return;
+
+  const makeRowHtml = c => {
+    const chgNum = Number(c.chg || 0);
+    const chgColor = chgNum >= 0 ? 'var(--green)' : 'var(--red)';
+    const sign = chgNum >= 0 ? '+' : '';
+    const pxStr = formatCoinPrice(c);
+    return `
+      <div class="coin-row">
+       <div>
+        <div class="coin-sym">${esc(c.sym)}</div>
+        <div class="small">${esc(c.name)}</div>
+       </div>
+       <div>
+        <div class="coin-px">${pxStr}</div>
+        <div class="coin-chg" style="color:${chgColor}">${sign}${chgNum.toFixed(2)}%</div>
+       </div>
+      </div>
+    `;
+  };
+
+  const singleSet = latestCoins.map(makeRowHtml).join('');
+  track.innerHTML = singleSet + singleSet;
+
+  if (hdr) {
+    hdr.textContent = latestCoins.map(c => `${c.sym} ${formatCoinPrice(c)}`).join(' • ');
+  }
+  if (upd) {
+    const modeLabel = isOfflineCoinFeed ? 'Cached / Offline' : `Updated ${new Date().toLocaleTimeString()}`;
+    upd.textContent = `${modeLabel} • Every 60s`;
+  }
+}
+
+async function refreshCoinPricesNow() {
+  if (coinRefreshInProgress) return;
+  coinRefreshInProgress = true;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4500);
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,dogecoin,solana&vs_currencies=usd&include_24hr_change=true',
+      { signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('Network response not OK');
+    const d = await res.json();
+    isOfflineCoinFeed = false;
+    latestCoins = [
+      { sym: 'BTC', name: 'Bitcoin', price: Number(d.bitcoin?.usd || latestCoins[0].price), chg: Number(d.bitcoin?.usd_24h_change || 0) },
+      { sym: 'ETH', name: 'Ethereum', price: Number(d.ethereum?.usd || latestCoins[1].price), chg: Number(d.ethereum?.usd_24h_change || 0) },
+      { sym: 'USDT', name: 'Tether', price: Number(d.tether?.usd || latestCoins[2].price), chg: Number(d.tether?.usd_24h_change || 0) },
+      { sym: 'DOGE', name: 'Dogecoin', price: Number(d.dogecoin?.usd || latestCoins[3].price), chg: Number(d.dogecoin?.usd_24h_change || 0) },
+      { sym: 'SOL', name: 'Solana', price: Number(d.solana?.usd || latestCoins[4].price), chg: Number(d.solana?.usd_24h_change || 0) }
+    ];
+  } catch (e) {
+    isOfflineCoinFeed = true;
+  } finally {
+    coinRefreshInProgress = false;
+    secondsRemaining = 60;
+    renderCoinSidebar();
+  }
+}
+
+setInterval(() => {
+  secondsRemaining -= 1;
+  const cd = document.getElementById('coinSyncCountdown');
+  if (secondsRemaining <= 0) {
+    refreshCoinPricesNow();
+  } else if (cd) {
+    cd.textContent = `Auto-sync: ${secondsRemaining}s`;
+  }
+}, 1000);
+
+function generateUniqueRefCode(db) {
+  const used = new Set(
+    Object.values(db.users || {})
+      .map(u => String(u.refCode || '').trim().toUpperCase())
+      .filter(Boolean)
+  );
+  let code = '';
+  let attempts = 0;
+  do {
+    const num = Math.floor(100000 + Math.random() * 900000);
+    code = `GM-${num}`;
+    attempts += 1;
+  } while (used.has(code) && attempts < 5000);
+  if (used.has(code)) {
+    code = `GM-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random()*100)}`;
+  }
+  return code;
+}
+
+async function submitLogin() {
+  clearAuthNotices();
+  if (Date.now() < loginFailTracker.lockedUntil) {
+    const waitSec = Math.ceil((loginFailTracker.lockedUntil - Date.now()) / 1000);
+    return showAuthErr(`Too many failed attempts. Please wait ${waitSec}s and try again.`);
+  }
+
+  const email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+  const password = (document.getElementById('loginPassword').value || '');
+
+  if (!email || !email.includes('@')) {
+    return showAuthErr('Please enter your registered email address.');
+  }
+  if (!password) {
+    return showAuthErr('Please enter your password.');
+  }
+
+  const db = getDB();
+  const existing = db.users[email];
+
+  if (!existing) {
+    setAuthenticatedEmail('');
+    renderUser();
+    return showAuthErr('Account not found. Please sign up first.');
+  }
+  const okPass = await verifyPassword(password, existing.passwordHash);
+  if (!okPass) {
+    loginFailTracker.count += 1;
+    if (loginFailTracker.count >= 5) {
+      loginFailTracker.lockedUntil = Date.now() + 30000;
+      loginFailTracker.count = 0;
+    }
+    setAuthenticatedEmail('');
+    renderUser();
+    return showAuthErr('Incorrect password. Please try again or use Forgot Password.');
+  }
+
+  loginFailTracker = { count: 0, lockedUntil: 0 };
+  setAuthenticatedEmail(email);
+  document.getElementById('loginPassword').value = '';
+  renderUser();
+  toast('Login successful.');
+}
+
+async function submitSignup() {
+  clearAuthNotices();
+  const email = (document.getElementById('signupEmail').value || '').trim().toLowerCase();
+  const password = (document.getElementById('signupPassword').value || '');
+  const refInput = (document.getElementById('signupRefCode').value || '').trim().toUpperCase();
+  const captchaEntered = (document.getElementById('signupCaptchaInput').value || '').trim().toUpperCase();
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return showAuthErr('Please enter a valid email address.');
+  }
+  if (!password || password.length < 6) {
+    return showAuthErr('Password must be at least 6 characters long.');
+  }
+  if (!captchaEntered || captchaEntered !== currentCaptcha) {
+    generateCaptcha();
+    return showAuthErr('Invalid captcha code.');
+  }
+
+  const db = getDB();
+  if (db.users[email]) {
+    generateCaptcha();
+    return showAuthErr('This email is already registered. Please switch to Login.');
+  }
+
+  let referrer = null;
+  if (refInput) {
+    referrer = Object.values(db.users).find(u => String(u.refCode || '').toUpperCase() === refInput);
+    if (!referrer || referrer.email === email) {
+      generateCaptcha();
+      return showAuthErr('Invalid referral code. Leave it blank or enter a valid GM-XXXXXX code.');
+    }
+  }
+
+  const myRefCode = generateUniqueRefCode(db);
+  let referredByEmail = '';
+
+  if (referrer) {
+    const alreadyReferred = (referrer.referrals || []).some(r => String(r.email || '').toLowerCase() === email);
+    if (!alreadyReferred) {
+      referredByEmail = referrer.email;
+      referrer.referrals = referrer.referrals || [];
+      referrer.referrals.push({
+        email,
+        bonus: REFERRAL_BONUS_USD,
+        credited: false,
+        status: 'Pending Plan Activation',
+        date: nowDateTimeStr()
+      });
+      referrer.events = referrer.events || [];
+      referrer.events.unshift({
+        type: 'Referral Registered',
+        detail: `${email} joined via ${refInput} ($${REFERRAL_BONUS_USD} unlocks upon plan activation)`,
+        amount: '$0.00',
+        status: 'Pending Activation',
+        date: nowDateTimeStr()
+      });
+    }
+  }
+
+  const salt = generateSecureSalt(16);
+  const passwordHash = await hashPassword(password, salt);
+
+  db.users[email] = {
+    email,
+    passwordHash,
+    refCode: myRefCode,
+    referredBy: referredByEmail,
+    referrals: [],
+    refEarnings: 0,
+    signupBonus: SIGNUP_BONUS_USD,
+    plan: 'None',
+    rate: 0,
+    activePlans: [],
+    balance: SIGNUP_BONUS_USD,
+    rewards: SIGNUP_BONUS_USD,
+    hashrate: 0,
+    contracts: 0,
+    payments: [],
+    withdrawals: [],
+    tickets: [],
+    events: [{ type: 'Sign-Up Bonus Credited', detail: 'Instant $10 USD welcome bonus (locked until first approved plan)', amount: '+ $10.00', status: 'Completed', date: nowDateTimeStr() }]
+  };
+
+  if (!saveDB(db)) return;
+  document.getElementById('signupEmail').value = '';
+  document.getElementById('signupPassword').value = '';
+  document.getElementById('signupRefCode').value = '';
+  document.getElementById('signupCaptchaInput').value = '';
+  document.getElementById('loginEmail').value = email;
+  generateCaptcha();
+
+  switchAuthView('login');
+  showAuthOk(`Account created for ${email} with $10.00 sign-up bonus. Your Referral Code: ${myRefCode}`);
+}
+
+function logoutUser() {
+  setAuthenticatedEmail('');
+  selectedPlan = null;
+  pendingPlan = null;
+  clearAuthNotices();
+  switchAuthView('login');
+  renderUser();
+  toast('Logged out.');
+}
+
+function selectPlan(plan, amount, rate) {
+  if (!getAuthenticatedEmail()) {
+    renderUser();
+    return showAuthErr('Please sign up or log in first to select and buy a plan.');
+  }
+  selectedPlan = { plan, amount, rate };
+  ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].forEach(p => {
+    const card = document.getElementById('planCard_' + p);
+    const buyBtn = document.getElementById('buyBtn_' + p);
+    const isSel = p === plan;
+    if (card) card.classList.toggle('selected', isSel);
+    if (buyBtn) buyBtn.style.display = isSel ? 'inline-block' : 'none';
+  });
+  const bar = document.getElementById('selectedPlanBuyBar');
+  const sum = document.getElementById('selectedPlanSummary');
+  if (bar) bar.style.display = 'flex';
+  if (sum) sum.textContent = `Selected Plan: ${plan} — ${money(amount)} (${rate}% / month)`;
+  toast(`${plan} plan selected. Click "Buy Plan" to submit TX & payment proof.`);
+}
+
+function openSelectedPlanModal() {
+  if (!selectedPlan) return toast('Please select a plan first.');
+  openPlanPaymentModal(selectedPlan.plan, selectedPlan.amount, selectedPlan.rate);
+}
+
+function openPlanPaymentModal(plan, amount, rate) {
+  if (!getAuthenticatedEmail()) {
+    renderUser();
+    return showAuthErr('Please sign up or log in first.');
+  }
+  selectedPlan = { plan, amount, rate };
+  pendingPlan = { plan, amount, rate };
+  document.getElementById('payModalTitle').textContent = `Buy ${plan} Plan — ${money(amount)} (${rate}% / mo)`;
+  document.getElementById('payModalDesc').textContent = `Send ${money(amount)} on your chosen chain, then enter Transaction ID and upload payment proof.`;
+  document.getElementById('payTxInput').value = '';
+  document.getElementById('payScreenshotInput').value = '';
+  document.getElementById('paySsFileName').textContent = 'No screenshot selected yet.';
+  const prev = document.getElementById('paySsPreview');
+  if (prev) { prev.src = ''; prev.style.display = 'none'; }
+  const errEl = document.getElementById('payReqErr');
+  if (errEl) { errEl.textContent = 'Please upload payment proof'; errEl.style.display = 'none'; }
+  updatePayWalletBox();
+  document.getElementById('payModal').style.display = 'grid';
+}
+
+function closePayModal() {
+  document.getElementById('payModal').style.display = 'none';
+}
+
+function updatePayWalletBox() {
+  const db = getDB();
+  const net = document.getElementById('payNetworkSelect').value;
+  const key = net.replace('.', '_');
+  document.getElementById('payWalletAddress').textContent = db.wallets[key] || db.wallets[net] || '—';
+}
+
+function validateAndReadImage(file, required = true) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      return required ? reject(new Error('Please upload payment proof screenshot.')) : resolve({ dataUrl: '', error: '' });
+    }
+    if (!file.type || !file.type.startsWith('image/')) {
+      return reject(new Error('Invalid file type. Please upload a valid image (PNG/JPG/WEBP).'));
+    }
+    if (file.size > MAX_IMG_BYTES) {
+      return reject(new Error(`Screenshot size (${(file.size / (1024 * 1024)).toFixed(2)} MB) exceeds 1.5 MB limit.`));
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 760;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          const ratio = Math.min(maxDim / w, maxDim / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = c.toDataURL('image/jpeg', 0.65);
+        resolve({ dataUrl: compressed, error: '' });
+      };
+      img.onerror = () => reject(new Error('Could not read image file. Please try another screenshot.'));
+      img.src = String(reader.result || '');
+    };
+    reader.onerror = () => reject(new Error('Error reading selected file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function previewPayScreenshot() {
+  const inp = document.getElementById('payScreenshotInput');
+  const lbl = document.getElementById('paySsFileName');
+  const prev = document.getElementById('paySsPreview');
+  const errEl = document.getElementById('payReqErr');
+  const file = inp && inp.files && inp.files[0];
+
+  if (!file) {
+    if (lbl) lbl.textContent = 'No screenshot selected yet.';
+    if (prev) { prev.src = ''; prev.style.display = 'none'; }
+    return;
+  }
+  if (!file.type || !file.type.startsWith('image/')) {
+    if (errEl) { errEl.textContent = 'Only image files (JPG, PNG, WEBP) are allowed.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (file.size > MAX_IMG_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(2);
+    if (errEl) { errEl.textContent = `Screenshot is ${mb} MB — max allowed is 1.5 MB.`; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (lbl) lbl.textContent = `Selected: ${file.name} (${Math.max(1, Math.round(file.size / 1024))} KB)`;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (prev && typeof reader.result === 'string') {
+      prev.src = reader.result;
+      prev.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function isDuplicateTxId(db, txId) {
+  const normTx = String(txId || '').trim().toLowerCase();
+  if (!normTx) return false;
+  return Object.values(db.users || {}).some(u =>
+    (u.payments || []).some(p => String(p.txDetails || '').trim().toLowerCase() === normTx)
+  );
+}
+
+async function submitPlanPayment() {
+  if (isSubmittingPayment) return;
+  const email = getAuthenticatedEmail();
+  const planObj = pendingPlan || selectedPlan;
+  if (!email || !planObj) return;
+
+  const txDetails = (document.getElementById('payTxInput').value || '').trim();
+  const network = document.getElementById('payNetworkSelect').value;
+  const fileInput = document.getElementById('payScreenshotInput');
+  const errEl = document.getElementById('payReqErr');
+  const btn = document.getElementById('submitPayBtn');
+
+  const showPayErr = msg => {
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    toast(msg);
+  };
+
+  const file = fileInput && fileInput.files && fileInput.files[0];
+  if (!file) return showPayErr('Please upload payment proof screenshot.');
+  if (!txDetails || txDetails.length < 4) return showPayErr('Please enter a valid Transaction ID / TX hash (min 4 characters).');
+
+  const preDb = getDB();
+  if (isDuplicateTxId(preDb, txDetails)) {
+    return showPayErr('This Transaction ID has already been submitted.');
+  }
+
+  isSubmittingPayment = true;
+  if (btn) btn.disabled = true;
+
+  try {
+    const imgResult = await validateAndReadImage(file, true);
+    const db = getDB();
+    if (isDuplicateTxId(db, txDetails)) {
+      return showPayErr('This Transaction ID has already been submitted.');
+    }
+    const u = db.users[email];
+    if (!u) return;
+
+    u.payments = u.payments || [];
+    u.payments.unshift({
+      id: newUniqueId('PAY'),
+      date: nowDateTimeStr(),
+      plan: planObj.plan,
+      amount: Number(planObj.amount),
+      rate: Number(planObj.rate),
+      network,
+      txDetails,
+      screenshot: imgResult.dataUrl,
+      status: 'Pending'
+    });
+
+    u.events = u.events || [];
+    u.events.unshift({
+      type: 'Plan Payment Submitted',
+      detail: `${planObj.plan} (${network}) • TX: ${txDetails}`,
+      amount: money(planObj.amount),
+      status: 'Pending',
+      date: nowDateTimeStr()
+    });
+
+    if (!saveDB(db)) return;
+    document.getElementById('payTxInput').value = '';
+    document.getElementById('payScreenshotInput').value = '';
+    pendingPlan = null;
+    closePayModal();
+    renderUser();
+    toast('Payment submitted with payment proof.');
+  } catch (err) {
+    showPayErr(err.message || 'Please upload a valid payment proof image.');
+  } finally {
+    isSubmittingPayment = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
+function isValidChainAddress(network, addr) {
+  const a = String(addr || '').trim();
+  if (a.length < 14 || /\s/.test(a)) return false;
+  if (network === 'BTC') return /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{20,62}$/.test(a);
+  if (network === 'USDT.TRC20') return /^T[a-zA-HJ-NP-Z0-9]{33}$/.test(a);
+  if (['USDT.BEP20', 'USDT.ERC20', 'ETH'].includes(network)) return /^0x[a-fA-F0-9]{40}$/.test(a);
+  if (network === 'DOGE') return /^D[a-zA-HJ-NP-Z0-9]{25,34}$/.test(a);
+  if (network === 'SOL') return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a);
+  return true;
+}
+
+function hasUnlockedBonus(u) {
+  const hasApprovedPlan = (u.activePlans && u.activePlans.length > 0) || (u.plan && u.plan !== 'None') || Number(u.contracts || 0) > 0;
+  return Boolean(hasApprovedPlan);
+}
+
+function getWithdrawableBalance(u) {
+  const bal = Number(u.balance || 0);
+  const bonus = Number(u.signupBonus !== undefined ? u.signupBonus : SIGNUP_BONUS_USD);
+  if (hasUnlockedBonus(u)) {
+    return Number(Math.max(0, bal).toFixed(2));
+  }
+  return Number(Math.max(0, bal - bonus).toFixed(2));
+}
+
+function submitWithdrawal(minerFeePaid) {
+  const email = getAuthenticatedEmail();
+  if (!email) return;
+  const amount = Number(document.getElementById('wdAmount').value || 0);
+  const network = document.getElementById('wdNetwork').value;
+  const toAddress = (document.getElementById('wdAddress').value || '').trim();
+  const feeProof = (document.getElementById('wdFeeProof').value || '').trim();
+
+  if (!amount || amount < MIN_WITHDRAW_USD) {
+    return toast(`Minimum withdrawal amount is ${money(MIN_WITHDRAW_USD)}.`);
+  }
+  if (!toAddress || !isValidChainAddress(network, toAddress)) {
+    return toast(`Enter a valid ${network} destination wallet address.`);
+  }
+  if (minerFeePaid && (!feeProof || feeProof.length < 4)) {
+    return toast('Enter the miner fee TX hash / reference before confirming fee paid.');
+  }
+
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+
+  const currentBal = Number(u.balance || 0);
+  const withdrawableBal = getWithdrawableBalance(u);
+
+  if (amount > currentBal) {
+    return toast(`Insufficient balance (${money(currentBal)} available).`);
+  }
+  if (amount > withdrawableBal) {
+    return toast(`Withdrawable balance is ${money(withdrawableBal)}. The $10 sign-up bonus unlocks after an approved mining plan.`);
+  }
+
+  const currentRewards = Number(u.rewards || 0);
+  const deductedFromRewards = Number(Math.min(amount, currentRewards).toFixed(2));
+
+  u.balance = Number((currentBal - amount).toFixed(2));
+  u.rewards = Number((currentRewards - deductedFromRewards).toFixed(2));
+
+  u.withdrawals = u.withdrawals || [];
+  u.withdrawals.unshift({
+    id: newUniqueId('WD'),
+    date: nowDateTimeStr(),
+    amount,
+    network,
+    toAddress,
+    minerFeePaid: Boolean(minerFeePaid),
+    feeProof: minerFeePaid ? feeProof : '',
+    deductedFromRewards,
+    status: minerFeePaid ? 'Miner Fee Paid — Processing (24 to 48 Hours)' : 'Pending Fee Confirmation'
+  });
+
+  u.events = u.events || [];
+  u.events.unshift({
+    type: 'Withdrawal Requested',
+    detail: `${network} → ${toAddress}${minerFeePaid ? ` (Fee Ref: ${feeProof})` : ''}`,
+    amount: '- ' + money(amount),
+    status: minerFeePaid ? 'Fee Paid' : 'Pending Fee',
+    date: nowDateTimeStr()
+  });
+
+  if (!saveDB(db)) return;
+  document.getElementById('wdAmount').value = '';
+  document.getElementById('wdAddress').value = '';
+  document.getElementById('wdFeeProof').value = '';
+  renderUser();
+  toast(minerFeePaid ? 'Miner fee & withdrawal recorded.' : 'Withdrawal request recorded.');
+}
+
+function confirmFeeLater(wdId) {
+  const email = getAuthenticatedEmail();
+  if (!email) return;
+  const proofEl = document.getElementById('feeProofLater_' + wdId);
+  const proof = proofEl ? proofEl.value.trim() : '';
+  if (!proof || proof.length < 4) {
+    return toast('Enter a valid miner fee TX hash / proof (min 4 characters).');
+  }
+
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+  const w = (u.withdrawals || []).find(x => x.id === wdId);
+  if (!w) return toast('Withdrawal not found.');
+  const st = String(w.status || '');
+  if (st.startsWith('Approved') || st.startsWith('Rejected')) {
+    return toast('Withdrawal is already finalized.');
+  }
+
+  w.minerFeePaid = true;
+  w.feeProof = proof;
+  w.status = 'Miner Fee Paid — Processing (24 to 48 Hours)';
+
+  u.events = u.events || [];
+  u.events.unshift({
+    type: 'Miner Fee Confirmed Later',
+    detail: `${w.id} (${w.network}) • Ref: ${proof}`,
+    amount: money(w.amount),
+    status: 'Fee Paid',
+    date: nowDateTimeStr()
+  });
+
+  if (!saveDB(db)) return;
+  renderUser();
+  toast('Miner fee proof submitted for withdrawal.');
+}
+
+async function submitTicket() {
+  const email = getAuthenticatedEmail();
+  if (!email) return;
+  const category = document.getElementById('tktCategory').value;
+  const subject = (document.getElementById('tktSubject').value || '').trim();
+  const message = (document.getElementById('tktMessage').value || '').trim();
+  const fileInput = document.getElementById('tktScreenshot');
+  const file = fileInput && fileInput.files && fileInput.files[0];
+
+  if (!subject || !message) return toast('Enter subject and message.');
+
+  let screenshot = '';
+  if (file) {
+    try {
+      const res = await validateAndReadImage(file, false);
+      screenshot = res.dataUrl;
+    } catch (err) {
+      return toast(err.message || 'Ticket screenshot could not be attached.');
+    }
+  }
+
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+
+  u.tickets = u.tickets || [];
+  u.tickets.unshift({ id: newUniqueId('TKT'), date: nowDateTimeStr(), category, subject, message, screenshot, status: 'Open' });
+  if (!saveDB(db)) return;
+  document.getElementById('tktSubject').value = '';
+  document.getElementById('tktMessage').value = '';
+  if (fileInput) fileInput.value = '';
+  renderUser();
+  toast('Support ticket submitted.');
+}
+
+function getSafeTelegramUrl(db) {
+  const raw = String((db && db.telegramChannelUrl) || '').trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return '';
+    return parsed.toString();
+  } catch (e) {
+    return '';
+  }
+}
+
+function syncTelegramLinks(db) {
+  const tgUrl = getSafeTelegramUrl(db);
+  document.querySelectorAll('[data-tg-link="true"]').forEach(link => {
+    if (tgUrl) {
+      link.href = tgUrl;
+      link.setAttribute('aria-disabled', 'false');
+      link.onclick = null;
+    } else {
+      link.href = '#sec-telegram';
+      link.setAttribute('aria-disabled', 'true');
+      link.onclick = e => {
+        e.preventDefault();
+        toast('Official Telegram channel link will be available shortly.');
+      };
+    }
+  });
+}
+
+function renderUser() {
+  const email = getAuthenticatedEmail();
+  const db = getDB();
+  syncTelegramLinks(db);
+
+  const u = email ? db.users[email] : null;
+  const headerControls = document.getElementById('authHeaderControls');
+  const navAuth = document.getElementById('navAuthLink');
+  const syncBadge = IS_FILE_PROTOCOL
+    ? `<span class="sync-pill warn" title="Run via HTTP server (e.g. Live Server) for cross-tab sync">Local File Mode</span>`
+    : `<span class="sync-pill">Synced</span>`;
+
+  if (u) {
+    headerControls.innerHTML = `${syncBadge}<span class="clients-pill">10,000+ Clients</span><span class="pill ok">${esc(u.email)}</span><button type="button" class="btn secondary" onclick="logoutUser()">Logout</button>`;
+    if (navAuth) { navAuth.style.display = 'none'; navAuth.setAttribute('aria-hidden', 'true'); }
+    document.getElementById('sec-auth').style.display = 'none';
+    document.getElementById('userDashboard').style.display = 'block';
+  } else {
+    headerControls.innerHTML = `${syncBadge}<span class="clients-pill">10,000+ Clients</span><button type="button" class="btn secondary" onclick="switchAuthView('login', true)">Login</button><button type="button" class="btn ok" onclick="switchAuthView('signup', true)">Sign Up ($10)</button>`;
+    if (navAuth) { navAuth.style.display = 'inline-block'; navAuth.setAttribute('aria-hidden', 'false'); }
+    document.getElementById('sec-auth').style.display = 'block';
+    document.getElementById('userDashboard').style.display = 'none';
+    return;
+  }
+
+  const sb = u.signupBonus !== undefined ? Number(u.signupBonus || 0) : SIGNUP_BONUS_USD;
+  const activePlans = u.activePlans || [];
+  const estMonthly = activePlans.reduce((sum, p) => sum + (Number(p.amount || 0) * Number(p.rate || 0) / 100), 0);
+  const unlocked = hasUnlockedBonus(u);
+  const withdrawable = getWithdrawableBalance(u);
+
+  document.getElementById('uBalance').textContent = money(u.balance);
+  document.getElementById('uPlanLabel').textContent = `Plan: ${u.plan || 'None'} (${u.rate || 0}% / mo • Est. ${money(estMonthly)}/mo)`;
+  document.getElementById('uSignupBonus').textContent = money(sb);
+  const bonusNote = document.getElementById('uBonusWithdrawNote');
+  if (bonusNote) {
+    bonusNote.textContent = unlocked ? 'Unlocked With Active Plan' : 'Unlocks After Plan Approval';
+  }
+  const wdEligText = document.getElementById('wdEligibleText');
+  if (wdEligText) {
+    wdEligText.textContent = `Withdrawable now: ${money(withdrawable)}${unlocked ? '' : ` ($${sb.toFixed(2)} sign-up bonus unlocks after an approved mining plan)`}.`;
+  }
+  document.getElementById('uRewards').textContent = money(u.rewards);
+  document.getElementById('uRefBonusLabel').textContent = `Ref Bonus: ${money(u.refEarnings || 0)}`;
+  document.getElementById('uHashrate').textContent = `${u.hashrate || 0} TH/s`;
+  document.getElementById('uContracts').textContent = `${u.contracts || 0} Active Contracts`;
+  document.getElementById('uEmailDisplay').textContent = u.email;
+  document.getElementById('uRefCodeDisplay').textContent = `Ref Code: ${u.refCode || '—'}`;
+  document.getElementById('uReferralCodeBox').textContent = u.refCode || '—';
+
+  ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM'].forEach(p => {
+    const c = document.getElementById('planCard_' + p);
+    const buyBtn = document.getElementById('buyBtn_' + p);
+    const isSel = selectedPlan && selectedPlan.plan === p;
+    const hasActive = activePlans.some(ap => String(ap.plan || '').toUpperCase() === p) || String(u.plan || '').toUpperCase() === p;
+    if (c) {
+      c.classList.toggle('active', hasActive);
+      c.classList.toggle('selected', Boolean(isSel));
+    }
+    if (buyBtn) buyBtn.style.display = isSel ? 'inline-block' : 'none';
+  });
+
+  const bar = document.getElementById('selectedPlanBuyBar');
+  const sum = document.getElementById('selectedPlanSummary');
+  if (bar) bar.style.display = selectedPlan ? 'flex' : 'none';
+  if (sum && selectedPlan) {
+    sum.textContent = `Selected Plan: ${selectedPlan.plan} — ${money(selectedPlan.amount)} (${selectedPlan.rate}% / month)`;
+  }
+
+  const refs = u.referrals || [];
+  const creditedCount = refs.filter(r => r.credited === true).length;
+  document.getElementById('uReferralCountText').textContent = `Total Referrals: ${refs.length} (${creditedCount} Activated) • Earned: ${money(u.refEarnings || 0)}`;
+  document.getElementById('uReferralsList').innerHTML = refs.length
+    ? refs.map(r => `<div class="item"><span>${esc(r.email)} (${esc(r.date)})</span><span class="pill ${r.credited ? 'ok' : ''}">${r.credited ? `+${money(r.bonus || 5)}` : 'Pending Plan'}</span></div>`).join('')
+    : '<p class="small">No referrals yet.</p>';
+
+  const activePlansEl = document.getElementById('uActivePlansList');
+  if (activePlansEl) {
+    activePlansEl.innerHTML = `<b style="color:var(--gold);font-size:13px">Active Plans (${activePlans.length})</b>` + (activePlans.length ? activePlans.map(ap => `<div class="item"><div><b>${esc(ap.plan)}</b> — ${money(ap.amount)} at ${ap.rate}%/mo<div class="small">Activated: ${esc(ap.activatedAt ? new Date(ap.activatedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—')}</div></div><span class="pill ok">Active</span></div>`).join('') : '<p class="small">No active plans yet.</p>');
+  }
+
+  const pays = u.payments || [];
+  document.getElementById('uPaymentsList').innerHTML = `<b style="color:var(--gold);font-size:13px">Plan Payments (${pays.length})</b>` + (pays.length ? pays.map(p => `<div class="item"><div><b>${esc(p.plan)}</b> ${money(p.amount)} (${esc(p.network)})<div class="small">TX ID: <b>${esc(p.txDetails)}</b> • ${esc(p.date)} ${p.screenshot ? '• Payment Proof Attached' : ''}</div></div><span class="pill ${p.status === 'Approved' ? 'ok' : (p.status === 'Rejected' ? 'bad' : '')}">${esc(p.status)}</span></div>`).join('') : '<p class="small">No payments yet.</p>');
+
+  const wds = u.withdrawals || [];
+  document.getElementById('uWithdrawalsList').innerHTML = `<b style="color:var(--gold);font-size:13px">Withdrawals (${wds.length})</b>` + (wds.length ? wds.map(w => {
+    const st = String(w.status || '');
+    const canConfirmLater = !w.minerFeePaid && !st.startsWith('Approved') && !st.startsWith('Rejected');
+    return `
+      <div class="item">
+       <div style="flex:1;min-width:210px">
+        <b>${money(w.amount)}</b> (${esc(w.network)}) → ${esc(w.toAddress)}
+        <div class="small">${esc(w.date)}${w.feeProof ? ` • Fee Ref: <b>${esc(w.feeProof)}</b>` : ''}</div>
+        ${canConfirmLater ? `
+          <div class="row" style="margin-top:6px;gap:6px">
+           <input id="feeProofLater_${esc(w.id)}" type="text" placeholder="Enter fee TX hash / proof..." style="flex:1;padding:7px 9px;font-size:12px">
+           <button type="button" class="btn ok" style="padding:7px 10px;font-size:12px" data-confirm-fee-id="${esc(w.id)}">Confirm Fee Later</button>
+          </div>
+        ` : ''}
+       </div>
+       <span class="pill ${st.startsWith('Approved') ? 'ok' : (st.startsWith('Rejected') ? 'bad' : '')}">${esc(w.status)}</span>
+      </div>
+    `;
+  }).join('') : '<p class="small">No withdrawals yet.</p>');
+
+  document.querySelectorAll('[data-confirm-fee-id]').forEach(btn => {
+    btn.onclick = () => confirmFeeLater(btn.getAttribute('data-confirm-fee-id'));
+  });
+
+  const tkts = u.tickets || [];
+  document.getElementById('uTicketsList').innerHTML = tkts.length ? tkts.map(t => `<div class="item"><div><b>${esc(t.subject)}</b> <span class="small">(${esc(t.category)} • ${esc(t.date)})</span><div class="small">${esc(t.message)}</div>${t.reply ? `<div class="small" style="color:#86efac"><b>Support Reply:</b> ${esc(t.reply)}</div>` : ''}</div><span class="pill ${t.status === 'Resolved' ? 'ok' : ''}">${esc(t.status)}</span></div>`).join('') : '<p class="small">No tickets raised yet.</p>';
+}
+
+document.addEventListener('click', e => {
+  const link = e.target.closest('a[href^="#sec-"]');
+  if (!link) return;
+  const targetId = link.getAttribute('href').slice(1);
+  if (targetId !== 'sec-auth' && targetId !== 'sec-telegram-guest' && targetId !== 'sec-about' && targetId !== 'sec-privacy' && !getAuthenticatedEmail()) {
+    if (targetId === 'sec-telegram') {
+      const guestTg = document.getElementById('sec-telegram-guest');
+      if (guestTg) {
+        e.preventDefault();
+        guestTg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+    e.preventDefault();
+    switchAuthView('login', true);
+    showAuthErr('Please log in or sign up first to access this section.');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('payModal').style.display = 'none';
+    document.getElementById('imgModal').style.display = 'none';
+  }
+});
+
+document.getElementById('payModal').addEventListener('click', e => {
+  if (e.target.id === 'payModal') closePayModal();
+});
+document.getElementById('imgModal').addEventListener('click', e => {
+  if (e.target.id === 'imgModal') e.currentTarget.style.display = 'none';
+});
+
+function updateFooterYear() {
+  const el = document.getElementById('footerYear');
+  if (el) el.textContent = `© ${new Date().getFullYear()} GlobalMining Inc. Cloud Mining Portal.`;
+}
+
+generateCaptcha();
+renderCoinSidebar();
+refreshCoinPricesNow();
+renderUser();
+updateFooterYear();
+</script>
+</body>
+</html>

@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GlobalMining — Admin Panel</title>
+<style>
+:root{
+  --bg:#09090b;
+  --panel:#131317;
+  --line:#2b2b33;
+  --text:#f8fafc;
+  --muted:#b4b4be;
+  --gold:#facc15;
+  --gold-soft:rgba(250,204,21,.14);
+  --green:#22c55e;
+  --red:#ef4444;
+  --tg:#38bdf8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(circle at 12% 10%, rgba(250,204,21,.08), transparent 45%), var(--bg);
+  color:var(--text);
+  font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  min-height:100vh;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid var(--gold);
+  outline-offset:2px;
+}
+.topbar{
+  position:sticky;top:0;z-index:20;
+  background:#0a0a0d;border-bottom:1px solid rgba(250,204,21,.35);
+  padding:12px 18px;
+}
+.topbar-inner{
+  max-width:1440px;margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:18px}
+.logo{
+  width:34px;height:34px;border-radius:9px;flex:0 0 34px;
+  background:linear-gradient(135deg,var(--gold),#f59e0b);
+  display:grid;place-items:center;color:#09090b;font-weight:900;
+}
+.container{max-width:1440px;margin:18px auto;padding:0 16px 36px}
+.login-wrap{max-width:440px;margin:36px auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.grid{display:grid;gap:14px}
+.stats-6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat-val{font-size:20px;font-weight:800;color:var(--gold);margin-top:4px;overflow-wrap:anywhere}
+.small{font-size:12px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 13px;border-radius:8px;background:linear-gradient(100deg,var(--gold),#f59e0b);color:#09090b;font-weight:800;font-size:12.5px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.secondary{background:#1d1d24;color:#fef08a;border:1px solid var(--line)}
+.btn.ok{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.45)}
+.btn.bad{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.45)}
+input,select,textarea{background:#0c0c10;border:1px solid #353542;color:#fff;padding:9px 11px;border-radius:8px;width:100%}
+textarea{min-height:62px;resize:vertical}
+.field{display:grid;gap:5px;margin-bottom:10px}
+.field label{font-size:12px;color:#e4e4e7;font-weight:600}
+.auth-err{
+  display:none;margin-bottom:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;font-weight:600;
+  background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.45);color:#fca5a5;
+}
+.item{border-bottom:1px solid #24242c;padding:11px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.item:last-child{border-bottom:0}
+.pill{font-size:11px;padding:4px 9px;border-radius:20px;font-weight:700;background:rgba(250,204,21,.16);color:#fde047;display:inline-block}
+.pill.ok{background:rgba(34,197,94,.18);color:#86efac}
+.pill.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.pill.info{background:rgba(56,189,248,.16);color:#bae6fd}
+.tg-icon{width:17px;height:17px;color:var(--tg);flex:0 0 auto}
+.portfolio-box{background:#0d0d12;border:1px solid #272730;border-radius:12px;padding:14px;margin-top:12px}
+.sub-list{background:#121218;border:1px solid #23232c;border-radius:10px;padding:10px 12px;margin-top:8px}
+.toast{position:fixed;right:16px;bottom:16px;left:16px;max-width:420px;margin-left:auto;background:#191812;border:1px solid var(--gold);color:#fef9c3;padding:11px 14px;border-radius:10px;display:none;z-index:50;font-weight:600;font-size:13px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;place-items:center;z-index:40;padding:12px}
+.modal-box{background:var(--panel);border:1px solid rgba(250,204,21,.4);border-radius:16px;max-width:720px;width:100%;padding:18px;text-align:center}
+@media(max-width:1200px){.stats-6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:980px){.stats-6,.cols-2,.cols-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+ <div class="topbar-inner">
+  <div class="brand">
+   <div class="logo" aria-hidden="true">G</div>
+   <div>GlobalMining <span class="pill" style="margin-left:6px">ADMIN PANEL</span></div>
+  </div>
+  <div class="row" id="adminHeaderControls"></div>
+ </div>
+</header>
+
+<section id="adminLoginSection" class="login-wrap" aria-label="Admin Login">
+ <div class="card">
+  <h1 style="margin:0 0 6px;font-size:20px;color:var(--gold)">Admin Login</h1>
+  <p class="small" style="margin:0 0 12px">Sign in with your admin credentials to access the dashboard.</p>
+  <div id="adminAuthErr" class="auth-err" role="alert"></div>
+  <div class="field">
+   <label for="adminEmail">Admin Email *</label>
+   <input id="adminEmail" type="email" value="admin@globalmining.io" autocomplete="username" onkeydown="if(event.key==='Enter')adminLogin()">
+  </div>
+  <div class="field">
+   <label for="adminPass">Admin Password *</label>
+   <input id="adminPass" type="password" placeholder="Enter admin password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
+  </div>
+  <button type="button" class="btn" style="width:100%;margin-top:4px" onclick="adminLogin()">Login To Admin Panel</button>
+ </div>
+</section>
+
+<main id="adminDashboard" class="container" style="display:none">
+ <div class="grid stats-6">
+  <div class="card" style="margin:0"><div class="small">Total Users</div><div class="stat-val" id="mTotalUsers">0</div></div>
+  <div class="card" style="margin:0"><div class="small">Total Deposited</div><div class="stat-val" style="color:var(--green)" id="mTotalDeposited">$0.00</div><div class="small" id="mPendingPayNote">0 Pending</div></div>
+  <div class="card" style="margin:0"><div class="small">Total Withdrawn</div><div class="stat-val" style="color:var(--tg)" id="mTotalWithdrawn">$0.00</div><div class="small" id="mPendingWdNote">0 Pending</div></div>
+  <div class="card" style="margin:0"><div class="small">Total Hashrate</div><div class="stat-val" id="mTotalHashrate">0 TH/s</div><div class="small" id="mTotalContracts">0 Contracts</div></div>
+  <div class="card" style="margin:0"><div class="small">Miner Fee Requests</div><div class="stat-val" id="mMinerFeeCount">0</div></div>
+  <div class="card" style="margin:0"><div class="small">Open Tickets</div><div class="stat-val" id="mOpenTickets">0</div></div>
+ </div>
+
+ <div class="grid cols-2" style="margin-top:16px">
+  <section class="card" aria-label="Telegram Channel Settings">
+   <div class="row" style="margin-bottom:8px">
+    <h2 style="margin:0;font-size:16px;color:var(--tg);display:inline-flex;align-items:center;gap:8px">
+     <svg class="tg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.944 4.668a1.5 1.5 0 0 0-1.61-.247L3.168 11.028a1.5 1.5 0 0 0 .113 2.83l4.383 1.368 1.662 5.205a1.5 1.5 0 0 0 2.55.57l2.37-2.43 4.542 3.33a1.5 1.5 0 0 0 2.378-.922l2.14-14.267a1.5 1.5 0 0 0-.42-1.224zM9.42 14.374l8.84-6.98-6.77 7.89-.26 3.12-1.81-5.03z"/>
+     </svg>
+     <span>Telegram Channel Link</span>
+    </h2>
+   </div>
+   <p class="small" style="margin:0 0 10px">Set the Telegram channel URL for users (Sign Up & User Dashboard).</p>
+   <div class="field">
+    <label for="tgUrlInput">Telegram Channel URL</label>
+    <input id="tgUrlInput" type="url" placeholder="https://t.me/yourchannel">
+   </div>
+   <div class="row">
+    <button type="button" class="btn ok" onclick="saveTelegramLink()">Save Telegram Link</button>
+    <button type="button" class="btn secondary" onclick="clearTelegramLink()">Clear Link</button>
+   </div>
+  </section>
+
+  <section class="card" aria-label="Deposit Wallet Addresses">
+   <h2 style="margin:0 0 8px;font-size:16px;color:var(--gold)">Deposit Wallets</h2>
+   <div class="grid cols-2" style="gap:8px">
+    <div class="field" style="margin:0"><label for="w_USDT_TRC20">USDT.TRC20</label><input id="w_USDT_TRC20" type="text"></div>
+    <div class="field" style="margin:0"><label for="w_USDT_BEP20">USDT.BEP20</label><input id="w_USDT_BEP20" type="text"></div>
+    <div class="field" style="margin:0"><label for="w_USDT_ERC20">USDT.ERC20</label><input id="w_USDT_ERC20" type="text"></div>
+    <div class="field" style="margin:0"><label for="w_BTC">BTC</label><input id="w_BTC" type="text"></div>
+    <div class="field" style="margin:0"><label for="w_ETH">ETH</label><input id="w_ETH" type="text"></div>
+    <div class="field" style="margin:0"><label for="w_DOGE">DOGE</label><input id="w_DOGE" type="text"></div>
+   </div>
+   <button type="button" class="btn" style="margin-top:10px" onclick="saveWallets()">Save Wallets</button>
+  </section>
+ </div>
+
+ <section class="card" aria-label="Individual User Portfolio & Manual Data Editor">
+  <div class="row" style="margin-bottom:10px">
+   <div>
+    <h2 style="margin:0;font-size:17px;color:var(--gold)">Individual User Portfolio & Manual Data Update</h2>
+    <p class="small" style="margin:2px 0 0">Select any registered user to view their full portfolio, deposit/withdrawal totals, and manually update balances, plans, or mining stats.</p>
+   </div>
+   <div style="min-width:260px;flex:0 1 340px">
+    <select id="userPortfolioSelect" onchange="onSelectPortfolioUser()"></select>
+   </div>
+  </div>
+  <div id="userPortfolioContainer"></div>
+ </section>
+
+ <section class="card" aria-label="Deposit / Plan Payments Queue">
+  <h2 style="margin:0 0 10px;font-size:17px;color:var(--gold)">Deposit & Plan Payments (Approve / Reject)</h2>
+  <div id="paymentsQueue"></div>
+ </section>
+
+ <div class="grid cols-2">
+  <section class="card" aria-label="Withdrawals & Miner Fee Approvals">
+   <h2 style="margin:0 0 10px;font-size:17px;color:var(--gold)">Withdrawals & Miner Fee Approval</h2>
+   <div id="withdrawalsQueue"></div>
+  </section>
+
+  <section class="card" aria-label="Support Tickets Queue">
+   <h2 style="margin:0 0 10px;font-size:17px;color:var(--gold)">Support Tickets</h2>
+   <div id="ticketsQueue"></div>
+  </section>
+ </div>
+
+ <section class="card" aria-label="Danger Zone — Erase All Data">
+  <div class="row">
+   <div>
+    <h2 style="margin:0;font-size:16px;color:#fca5a5">Erase All Portal Data</h2>
+    <p class="small" style="margin:2px 0 0">Permanently clears all registered users, deposits, withdrawals, tickets, and custom settings from local storage.</p>
+   </div>
+   <button type="button" class="btn bad" onclick="eraseAllData()">Erase All Data</button>
+  </div>
+ </section>
+</main>
+
+<div class="modal-bg" id="proofModal" role="dialog" aria-modal="true" aria-label="Proof Preview">
+ <div class="modal-box">
+  <div class="row" style="margin-bottom:8px">
+   <h2 style="margin:0;font-size:16px;color:var(--gold)">Proof Screenshot</h2>
+   <button type="button" class="btn secondary" onclick="document.getElementById('proofModal').style.display='none'">✕</button>
+  </div>
+  <img id="proofModalImg" alt="Proof preview" style="max-width:100%;max-height:72vh;border-radius:10px;border:1px solid var(--line)">
+ </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DB_KEY = 'globalmining_db_v2';
+const SYNC_CHANNEL_NAME = 'globalmining_sync_v2';
+const ADMIN_SESSION_KEY = 'globalmining_admin_session_v2';
+const REFERRAL_BONUS_USD = 5;
+
+let adminAuthenticated = false;
+let selectedUserEmail = '';
+try {
+  adminAuthenticated = sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+} catch (e) {}
+
+const defaultDB = {
+  adminEmail: 'admin@globalmining.io',
+  adminPass: 'Admin@1234',
+  telegramChannelUrl: '',
+  wallets: {
+    BTC: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    USDT_BEP20: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    USDT_ERC20: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    USDT_TRC20: 'TNPeeaaFB7K9cmo4uQpcU32zGK8G1NYqeL',
+    ETH: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    DOGE: 'D8vFz4p1L37jdg9xYQ9sA1B2C3D4E5F6G7',
+    SOL: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU'
+  },
+  users: {}
+};
+
+const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel(SYNC_CHANNEL_NAME) : null;
+if (syncChannel) {
+  syncChannel.onmessage = () => renderAdmin(false);
+}
+window.addEventListener('storage', e => {
+  if (!e.key || e.key === DB_KEY) renderAdmin(false);
+});
+
+function cloneObj(o) { return JSON.parse(JSON.stringify(o)); }
+
+function getDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    const db = raw ? JSON.parse(raw) : cloneObj(defaultDB);
+    if (!db.users || typeof db.users !== 'object') db.users = {};
+    if (!db.wallets || typeof db.wallets !== 'object') db.wallets = cloneObj(defaultDB.wallets);
+    if (typeof db.telegramChannelUrl !== 'string') db.telegramChannelUrl = '';
+    if (!db.adminEmail) db.adminEmail = defaultDB.adminEmail;
+    if (!db.adminPass) db.adminPass = defaultDB.adminPass;
+    return db;
+  } catch (e) {
+    return cloneObj(defaultDB);
+  }
+}
+
+function saveDB(db) {
+  try {
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    if (syncChannel) syncChannel.postMessage({ type: 'DB_UPDATED', ts: Date.now() });
+    return true;
+  } catch (e) {
+    toast('Storage full.');
+    return false;
+  }
+}
+
+function setAdminAuthState(isAuthed) {
+  adminAuthenticated = Boolean(isAuthed);
+  try {
+    if (adminAuthenticated) sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+    else sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  } catch (e) {}
+}
+
+function adminLogin() {
+  const errEl = document.getElementById('adminAuthErr');
+  if (errEl) errEl.style.display = 'none';
+
+  const email = (document.getElementById('adminEmail').value || '').trim().toLowerCase();
+  const pass = (document.getElementById('adminPass').value || '');
+  const db = getDB();
+
+  if (email !== String(db.adminEmail || '').trim().toLowerCase() || pass !== String(db.adminPass || '')) {
+    if (errEl) {
+      errEl.textContent = 'Invalid admin email or password.';
+      errEl.style.display = 'block';
+    }
+    toast('Invalid admin credentials.');
+    return;
+  }
+
+  setAdminAuthState(true);
+  document.getElementById('adminPass').value = '';
+  renderAdmin(true);
+  toast('Admin logged in.');
+}
+
+function adminLogout() {
+  setAdminAuthState(false);
+  selectedUserEmail = '';
+  document.getElementById('proofModal').style.display = 'none';
+  renderAdmin(false);
+  toast('Admin logged out.');
+}
+
+function eraseAllData() {
+  if (!adminAuthenticated) return;
+  const firstConfirm = confirm('Are you sure you want to ERASE ALL DATA (users, deposits, withdrawals, tickets, wallets)?');
+  if (!firstConfirm) return;
+  const secondConfirm = confirm('Final warning: This action cannot be undone. Click OK to erase everything.');
+  if (!secondConfirm) return;
+
+  const fresh = cloneObj(defaultDB);
+  try {
+    localStorage.removeItem(DB_KEY);
+    localStorage.setItem(DB_KEY, JSON.stringify(fresh));
+    if (syncChannel) syncChannel.postMessage({ type: 'DB_ERASED', ts: Date.now() });
+  } catch (e) {
+    toast('Could not erase storage completely.');
+  }
+  selectedUserEmail = '';
+  renderAdmin(true);
+  toast('All portal data erased.');
+}
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function money(n) {
+  return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function nowDateTimeStr() {
+  return new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function openProofModal(src) {
+  if (!adminAuthenticated || !src) return;
+  document.getElementById('proofModalImg').src = src;
+  document.getElementById('proofModal').style.display = 'grid';
+}
+
+function saveTelegramLink() {
+  if (!adminAuthenticated) return;
+  const raw = (document.getElementById('tgUrlInput').value || '').trim();
+  if (raw) {
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') {
+        return toast('Enter a valid http/https URL.');
+      }
+    } catch (e) {
+      return toast('Enter a valid URL (e.g. https://t.me/channelname).');
+    }
+  }
+  const db = getDB();
+  db.telegramChannelUrl = raw;
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast(raw ? 'Telegram channel link saved.' : 'Telegram channel link cleared.');
+  }
+}
+
+function clearTelegramLink() {
+  document.getElementById('tgUrlInput').value = '';
+  saveTelegramLink();
+}
+
+function saveWallets() {
+  if (!adminAuthenticated) return;
+  const db = getDB();
+  ['USDT_TRC20', 'USDT_BEP20', 'USDT_ERC20', 'BTC', 'ETH', 'DOGE'].forEach(k => {
+    const el = document.getElementById('w_' + k);
+    if (el && el.value.trim()) db.wallets[k] = el.value.trim();
+  });
+  if (saveDB(db)) toast('Deposit wallets saved.');
+}
+
+function onSelectPortfolioUser() {
+  const sel = document.getElementById('userPortfolioSelect');
+  selectedUserEmail = sel ? sel.value : '';
+  renderUserPortfolioSection();
+}
+
+function saveManualUserData(email) {
+  if (!adminAuthenticated || !email) return;
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return toast('User not found.');
+
+  const balance = Number(document.getElementById('mUserBalance')?.value ?? u.balance ?? 0);
+  const signupBonus = Number(document.getElementById('mUserBonus')?.value ?? u.signupBonus ?? 0);
+  const rewards = Number(document.getElementById('mUserRewards')?.value ?? u.rewards ?? 0);
+  const refEarnings = Number(document.getElementById('mUserRefEarnings')?.value ?? u.refEarnings ?? 0);
+  const hashrate = Number(document.getElementById('mUserHashrate')?.value ?? u.hashrate ?? 0);
+  const contracts = Number(document.getElementById('mUserContracts')?.value ?? u.contracts ?? 0);
+  const plan = String(document.getElementById('mUserPlan')?.value ?? u.plan ?? 'None').trim() || 'None';
+  const rate = Number(document.getElementById('mUserRate')?.value ?? u.rate ?? 0);
+
+  if ([balance, signupBonus, rewards, refEarnings, hashrate, contracts, rate].some(n => Number.isNaN(n) || n < 0)) {
+    return toast('Enter valid non-negative numbers for all numeric fields.');
+  }
+
+  u.balance = Number(balance.toFixed(2));
+  u.signupBonus = Number(signupBonus.toFixed(2));
+  u.rewards = Number(rewards.toFixed(2));
+  u.refEarnings = Number(refEarnings.toFixed(2));
+  u.hashrate = Number(hashrate);
+  u.contracts = Math.floor(contracts);
+  u.plan = plan;
+  u.rate = Number(rate);
+
+  u.events = u.events || [];
+  u.events.unshift({
+    type: 'Manual Portfolio Update',
+    detail: `Bal ${money(u.balance)} • Plan ${u.plan} (${u.rate}%) • ${u.hashrate} TH/s`,
+    amount: money(u.balance),
+    status: 'Updated',
+    date: nowDateTimeStr()
+  });
+
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast(`Updated portfolio for ${email}.`);
+  }
+}
+
+function getUserTotals(u) {
+  const pays = u.payments || [];
+  const wds = u.withdrawals || [];
+  const approvedDeposit = pays
+    .filter(p => p.status === 'Approved')
+    .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const pendingDeposit = pays
+    .filter(p => p.status === 'Pending')
+    .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const approvedWithdraw = wds
+    .filter(w => String(w.status || '').startsWith('Approved'))
+    .reduce((sum, w) => sum + Number(w.amount || 0), 0);
+  const pendingWithdraw = wds
+    .filter(w => {
+      const s = String(w.status || '');
+      return !s.startsWith('Approved') && !s.startsWith('Rejected');
+    })
+    .reduce((sum, w) => sum + Number(w.amount || 0), 0);
+
+  return { approvedDeposit, pendingDeposit, approvedWithdraw, pendingWithdraw };
+}
+
+function renderUserPortfolioSection() {
+  const sel = document.getElementById('userPortfolioSelect');
+  const box = document.getElementById('userPortfolioContainer');
+  if (!sel || !box) return;
+
+  const db = getDB();
+  const emails = Object.keys(db.users || {});
+  if (!emails.length) {
+    sel.innerHTML = `<option value="">No registered users</option>`;
+    box.innerHTML = `<p class="small">No user data available yet.</p>`;
+    return;
+  }
+
+  if (!selectedUserEmail || !db.users[selectedUserEmail]) {
+    selectedUserEmail = emails[0];
+  }
+
+  sel.innerHTML = emails
+    .map(em => `<option value="${esc(em)}" ${em === selectedUserEmail ? 'selected' : ''}>${esc(em)}</option>`)
+    .join('');
+
+  const u = db.users[selectedUserEmail];
+  const totals = getUserTotals(u);
+  const refs = u.referrals || [];
+  const pays = u.payments || [];
+  const wds = u.withdrawals || [];
+  const tkts = u.tickets || [];
+
+  box.innerHTML = `
+    <div class="portfolio-box">
+     <div class="row" style="margin-bottom:10px">
+      <div>
+       <b style="font-size:15px;color:#fff">${esc(u.email)}</b>
+       <div class="small">Referral Code: <b>${esc(u.refCode || '—')}</b> • Referred By: <b>${esc(u.referredBy || 'None')}</b></div>
+      </div>
+      <div class="row" style="gap:8px">
+       <span class="pill ok">Deposited: ${money(totals.approvedDeposit)}</span>
+       <span class="pill info">Withdrawn: ${money(totals.approvedWithdraw)}</span>
+       <span class="pill">Plan: ${esc(u.plan || 'None')} (${Number(u.rate || 0)}%/mo)</span>
+      </div>
+     </div>
+
+     <div class="grid stats-6" style="margin-bottom:14px">
+      <div class="card" style="margin:0;padding:12px"><div class="small">Balance</div><div class="stat-val" style="font-size:17px">${money(u.balance)}</div></div>
+      <div class="card" style="margin:0;padding:12px"><div class="small">Sign-Up Bonus</div><div class="stat-val" style="font-size:17px">${money(u.signupBonus)}</div></div>
+      <div class="card" style="margin:0;padding:12px"><div class="small">Rewards</div><div class="stat-val" style="font-size:17px;color:var(--green)">${money(u.rewards)}</div></div>
+      <div class="card" style="margin:0;padding:12px"><div class="small">Ref Earnings</div><div class="stat-val" style="font-size:17px">${money(u.refEarnings)}</div></div>
+      <div class="card" style="margin:0;padding:12px"><div class="small">Hashrate</div><div class="stat-val" style="font-size:17px">${Number(u.hashrate || 0)} TH/s</div></div>
+      <div class="card" style="margin:0;padding:12px"><div class="small">Contracts</div><div class="stat-val" style="font-size:17px">${Number(u.contracts || 0)}</div></div>
+     </div>
+
+     <h3 style="margin:0 0 8px;font-size:14px;color:var(--gold)">Manual Data Update</h3>
+     <div class="grid cols-3" style="gap:10px">
+      <div class="field" style="margin:0"><label for="mUserBalance">Balance ($)</label><input id="mUserBalance" type="number" step="0.01" min="0" value="${Number(u.balance || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserBonus">Sign-Up Bonus ($)</label><input id="mUserBonus" type="number" step="0.01" min="0" value="${Number(u.signupBonus || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserRewards">Rewards ($)</label><input id="mUserRewards" type="number" step="0.01" min="0" value="${Number(u.rewards || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserRefEarnings">Referral Earnings ($)</label><input id="mUserRefEarnings" type="number" step="0.01" min="0" value="${Number(u.refEarnings || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserHashrate">Hashrate (TH/s)</label><input id="mUserHashrate" type="number" step="1" min="0" value="${Number(u.hashrate || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserContracts">Active Contracts</label><input id="mUserContracts" type="number" step="1" min="0" value="${Number(u.contracts || 0)}"></div>
+      <div class="field" style="margin:0"><label for="mUserPlan">Plan Name</label><input id="mUserPlan" type="text" value="${esc(u.plan || 'None')}"></div>
+      <div class="field" style="margin:0"><label for="mUserRate">Monthly Rate (%)</label><input id="mUserRate" type="number" step="0.1" min="0" value="${Number(u.rate || 0)}"></div>
+      <div class="field" style="margin:0;align-self:end"><button type="button" class="btn ok" style="width:100%" onclick="saveManualUserData('${esc(u.email)}')">Save User Data</button></div>
+     </div>
+
+     <div class="grid cols-3" style="margin-top:12px;gap:10px">
+      <div class="sub-list">
+       <b style="font-size:12.5px;color:var(--gold)">Deposits (${pays.length}) • Approved ${money(totals.approvedDeposit)}</b>
+       ${pays.length ? pays.map(p => `<div class="item" style="padding:6px 0"><div class="small"><b>${esc(p.plan)}</b> ${money(p.amount)} (${esc(p.network)})<br>TX: ${esc(p.txDetails)}</div><span class="pill ${p.status === 'Approved' ? 'ok' : (p.status === 'Rejected' ? 'bad' : '')}">${esc(p.status)}</span></div>`).join('') : '<div class="small" style="margin-top:4px">No deposits.</div>'}
+      </div>
+      <div class="sub-list">
+       <b style="font-size:12.5px;color:var(--gold)">Withdrawals (${wds.length}) • Sent ${money(totals.approvedWithdraw)}</b>
+       ${wds.length ? wds.map(w => `<div class="item" style="padding:6px 0"><div class="small"><b>${money(w.amount)}</b> (${esc(w.network)})<br>To: ${esc(w.toAddress)}</div><span class="pill ${String(w.status || '').startsWith('Approved') ? 'ok' : (String(w.status || '').startsWith('Rejected') ? 'bad' : '')}">${esc(w.status)}</span></div>`).join('') : '<div class="small" style="margin-top:4px">No withdrawals.</div>'}
+      </div>
+      <div class="sub-list">
+       <b style="font-size:12.5px;color:var(--gold)">Referrals (${refs.length}) & Tickets (${tkts.length})</b>
+       ${refs.length ? refs.map(r => `<div class="item" style="padding:6px 0"><div class="small">Ref: <b>${esc(r.email)}</b></div><span class="pill ${r.credited ? 'ok' : ''}">${r.credited ? 'Credited' : 'Pending'}</span></div>`).join('') : '<div class="small" style="margin-top:4px">No referrals.</div>'}
+       ${tkts.length ? tkts.map(t => `<div class="item" style="padding:6px 0"><div class="small">Tkt: <b>${esc(t.subject)}</b></div><span class="pill ${t.status === 'Resolved' ? 'ok' : ''}">${esc(t.status)}</span></div>`).join('') : '<div class="small" style="margin-top:4px">No tickets.</div>'}
+      </div>
+     </div>
+    </div>
+  `;
+}
+
+function creditReferrerIfEligible(db, userObj) {
+  const refBy = String(userObj.referredBy || '').trim().toLowerCase();
+  if (!refBy || !db.users[refBy]) return;
+  const referrer = db.users[refBy];
+  referrer.referrals = referrer.referrals || [];
+  const entry = referrer.referrals.find(r => String(r.email || '').toLowerCase() === String(userObj.email || '').toLowerCase());
+  if (!entry || entry.credited) return;
+
+  const bonus = Number(entry.bonus || REFERRAL_BONUS_USD);
+  entry.credited = true;
+  entry.status = 'Credited';
+  referrer.refEarnings = Number((Number(referrer.refEarnings || 0) + bonus).toFixed(2));
+  referrer.balance = Number((Number(referrer.balance || 0) + bonus).toFixed(2));
+  referrer.rewards = Number((Number(referrer.rewards || 0) + bonus).toFixed(2));
+  referrer.events = referrer.events || [];
+  referrer.events.unshift({
+    type: 'Referral Bonus Credited',
+    detail: `${userObj.email} activated a mining plan`,
+    amount: '+ ' + money(bonus),
+    status: 'Completed',
+    date: nowDateTimeStr()
+  });
+}
+
+function setPaymentDecision(email, payId, decision) {
+  if (!adminAuthenticated) return;
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+  const p = (u.payments || []).find(item => item.id === payId);
+  if (!p || p.status !== 'Pending') return toast('Payment already processed.');
+
+  p.status = decision;
+  u.events = u.events || [];
+
+  if (decision === 'Approved') {
+    const amt = Number(p.amount || 0);
+    const rate = Number(p.rate || 0);
+    u.plan = p.plan;
+    u.rate = rate;
+    u.contracts = Number(u.contracts || 0) + 1;
+    u.hashrate = Number(u.hashrate || 0) + Math.max(10, Math.round(amt / 5));
+    u.activePlans = u.activePlans || [];
+    u.activePlans.push({
+      plan: p.plan,
+      amount: amt,
+      rate,
+      activatedAt: Date.now()
+    });
+    u.events.unshift({
+      type: 'Plan Activated',
+      detail: `${p.plan} (${money(amt)} at ${rate}%/mo)`,
+      amount: money(amt),
+      status: 'Approved',
+      date: nowDateTimeStr()
+    });
+    creditReferrerIfEligible(db, u);
+  } else {
+    u.events.unshift({
+      type: 'Plan Payment Rejected',
+      detail: `${p.plan} • TX: ${p.txDetails}`,
+      amount: money(p.amount),
+      status: 'Rejected',
+      date: nowDateTimeStr()
+    });
+  }
+
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast(`Deposit/plan payment ${decision.toLowerCase()}.`);
+  }
+}
+
+function setWithdrawalDecision(email, wdId, decision) {
+  if (!adminAuthenticated) return;
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+  const w = (u.withdrawals || []).find(item => item.id === wdId);
+  if (!w) return;
+  const st = String(w.status || '');
+  if (st.startsWith('Approved') || st.startsWith('Rejected')) return toast('Withdrawal already finalized.');
+
+  if (decision === 'Approved') {
+    w.status = 'Approved — Sent';
+    u.events = u.events || [];
+    u.events.unshift({
+      type: 'Withdrawal Approved',
+      detail: `${w.network} → ${w.toAddress}`,
+      amount: money(w.amount),
+      status: 'Approved',
+      date: nowDateTimeStr()
+    });
+  } else {
+    w.status = 'Rejected — Refunded';
+    u.balance = Number((Number(u.balance || 0) + Number(w.amount || 0)).toFixed(2));
+    u.rewards = Number((Number(u.rewards || 0) + Number(w.deductedFromRewards || w.amount || 0)).toFixed(2));
+    u.events = u.events || [];
+    u.events.unshift({
+      type: 'Withdrawal Rejected & Refunded',
+      detail: `${w.id} (${w.network})`,
+      amount: '+ ' + money(w.amount),
+      status: 'Refunded',
+      date: nowDateTimeStr()
+    });
+  }
+
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast(`Withdrawal ${decision.toLowerCase()}.`);
+  }
+}
+
+function setMinerFeeDecision(email, wdId, decision) {
+  if (!adminAuthenticated) return;
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+  const w = (u.withdrawals || []).find(item => item.id === wdId);
+  if (!w) return toast('Withdrawal not found.');
+
+  u.events = u.events || [];
+  if (decision === 'Approved') {
+    w.minerFeePaid = true;
+    w.minerFeeStatus = 'Miner Fee Approved';
+    w.status = 'Approved — Sent';
+    u.events.unshift({
+      type: 'Miner Fee Approved',
+      detail: `${w.id} (${w.network})${w.feeProof ? ` • Ref: ${w.feeProof}` : ''}`,
+      amount: money(w.amount),
+      status: 'Approved',
+      date: nowDateTimeStr()
+    });
+  } else {
+    const alreadyRefunded = String(w.status || '').startsWith('Rejected');
+    w.minerFeePaid = false;
+    w.minerFeeStatus = 'Miner Fee Rejected';
+    w.status = 'Rejected — Refunded';
+    if (!alreadyRefunded) {
+      u.balance = Number((Number(u.balance || 0) + Number(w.amount || 0)).toFixed(2));
+      u.rewards = Number((Number(u.rewards || 0) + Number(w.deductedFromRewards || w.amount || 0)).toFixed(2));
+    }
+    u.events.unshift({
+      type: 'Miner Fee Rejected & Refunded',
+      detail: `${w.id} (${w.network})${w.feeProof ? ` • Ref: ${w.feeProof}` : ''}`,
+      amount: '+ ' + money(w.amount),
+      status: 'Refunded',
+      date: nowDateTimeStr()
+    });
+  }
+
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast(`Miner fee ${decision.toLowerCase()}.`);
+  }
+}
+
+function resolveTicket(email, tktId) {
+  if (!adminAuthenticated) return;
+  const replyEl = document.getElementById('tktReply_' + tktId);
+  const reply = replyEl ? replyEl.value.trim() : '';
+  if (!reply) return toast('Enter a reply before resolving.');
+
+  const db = getDB();
+  const u = db.users[email];
+  if (!u) return;
+  const t = (u.tickets || []).find(item => item.id === tktId);
+  if (!t) return;
+
+  t.reply = reply;
+  t.status = 'Resolved';
+  if (saveDB(db)) {
+    renderAdmin(false);
+    toast('Ticket resolved.');
+  }
+}
+
+function renderAdmin(syncInputs = true) {
+  const hdr = document.getElementById('adminHeaderControls');
+  const loginSec = document.getElementById('adminLoginSection');
+  const dashEl = document.getElementById('adminDashboard');
+
+  if (!adminAuthenticated) {
+    if (hdr) hdr.innerHTML = `<span class="pill">Locked</span>`;
+    if (loginSec) loginSec.style.display = 'block';
+    if (dashEl) dashEl.style.display = 'none';
+    return;
+  }
+
+  const db = getDB();
+  if (hdr) {
+    hdr.innerHTML = `<span class="pill ok">${esc(db.adminEmail)}</span><button type="button" class="btn secondary" onclick="renderAdmin(false)">Refresh</button><button type="button" class="btn bad" onclick="adminLogout()">Logout</button>`;
+  }
+  if (loginSec) loginSec.style.display = 'none';
+  if (dashEl) dashEl.style.display = 'block';
+
+  const users = Object.values(db.users || {});
+
+  if (syncInputs) {
+    const tgInp = document.getElementById('tgUrlInput');
+    if (tgInp) tgInp.value = db.telegramChannelUrl || '';
+    ['USDT_TRC20', 'USDT_BEP20', 'USDT_ERC20', 'BTC', 'ETH', 'DOGE'].forEach(k => {
+      const el = document.getElementById('w_' + k);
+      if (el) el.value = db.wallets[k] || '';
+    });
+  }
+
+  let totalDeposited = 0;
+  let pendingPayCount = 0;
+  let totalWithdrawn = 0;
+  let pendingWdCount = 0;
+  let totalHashrate = 0;
+  let totalContracts = 0;
+  let minerFeeCount = 0;
+  let openTicketCount = 0;
+
+  const payRows = [];
+  const wdRows = [];
+  const tktRows = [];
+
+  users.forEach(u => {
+    totalHashrate += Number(u.hashrate || 0);
+    totalContracts += Number(u.contracts || 0);
+
+    (u.payments || []).forEach(p => {
+      if (p.status === 'Approved') totalDeposited += Number(p.amount || 0);
+      if (p.status === 'Pending') pendingPayCount += 1;
+      payRows.push({ user: u, pay: p });
+    });
+
+    (u.withdrawals || []).forEach(w => {
+      const st = String(w.status || '');
+      if (st.startsWith('Approved')) totalWithdrawn += Number(w.amount || 0);
+      if (!st.startsWith('Approved') && !st.startsWith('Rejected')) pendingWdCount += 1;
+      if (w.minerFeePaid || w.feeProof || w.minerFeeStatus) minerFeeCount += 1;
+      wdRows.push({ user: u, wd: w });
+    });
+
+    (u.tickets || []).forEach(t => {
+      if (t.status !== 'Resolved') openTicketCount += 1;
+      tktRows.push({ user: u, tkt: t });
+    });
+  });
+
+  document.getElementById('mTotalUsers').textContent = String(users.length);
+  document.getElementById('mTotalDeposited').textContent = money(totalDeposited);
+  document.getElementById('mPendingPayNote').textContent = `${pendingPayCount} Pending`;
+  document.getElementById('mTotalWithdrawn').textContent = money(totalWithdrawn);
+  document.getElementById('mPendingWdNote').textContent = `${pendingWdCount} Pending`;
+  document.getElementById('mTotalHashrate').textContent = `${totalHashrate} TH/s`;
+  document.getElementById('mTotalContracts').textContent = `${totalContracts} Contracts`;
+  document.getElementById('mMinerFeeCount').textContent = String(minerFeeCount);
+  document.getElementById('mOpenTickets').textContent = String(openTicketCount);
+
+  renderUserPortfolioSection();
+
+  document.getElementById('paymentsQueue').innerHTML = payRows.length
+    ? payRows.map(({ user, pay }) => `
+      <div class="item">
+       <div>
+        <b>${esc(user.email)}</b> • <span class="pill">${esc(pay.plan)}</span> <b>${money(pay.amount)}</b> (${esc(pay.network)})
+        <div class="small">TX ID: <b>${esc(pay.txDetails)}</b> • ${esc(pay.date)}</div>
+       </div>
+       <div class="row" style="gap:6px">
+        <span class="pill ${pay.status === 'Approved' ? 'ok' : (pay.status === 'Rejected' ? 'bad' : '')}">${esc(pay.status)}</span>
+        ${pay.screenshot ? `<button type="button" class="btn secondary" data-proof-src="${esc(pay.screenshot)}">View Proof</button>` : ''}
+        ${pay.status === 'Pending' ? `
+          <button type="button" class="btn ok" onclick="setPaymentDecision('${esc(user.email)}','${esc(pay.id)}','Approved')">Approve</button>
+          <button type="button" class="btn bad" onclick="setPaymentDecision('${esc(user.email)}','${esc(pay.id)}','Rejected')">Reject</button>
+        ` : ''}
+       </div>
+      </div>
+    `).join('')
+    : '<p class="small">No deposit or plan payments submitted yet.</p>';
+
+  document.getElementById('withdrawalsQueue').innerHTML = wdRows.length
+    ? wdRows.map(({ user, wd }) => {
+      const st = String(wd.status || '');
+      const finalized = st.startsWith('Approved') || st.startsWith('Rejected');
+      const hasMinerFee = Boolean(wd.minerFeePaid || wd.feeProof || wd.minerFeeStatus);
+      return `
+        <div class="item">
+         <div style="flex:1;min-width:230px">
+          <b>${esc(user.email)}</b> • <b>${money(wd.amount)}</b> (${esc(wd.network)})
+          <div class="small">To: ${esc(wd.toAddress)} • ${esc(wd.date)}</div>
+          <div class="small">
+           Miner Fee: <b>${hasMinerFee ? (esc(wd.minerFeeStatus || (wd.minerFeePaid ? 'Paid' : 'Provided'))) : 'Not Provided'}</b>
+           ${wd.feeProof ? ` • Ref: <b>${esc(wd.feeProof)}</b>` : ''}
+          </div>
+         </div>
+         <div class="row" style="gap:6px">
+          <span class="pill ${st.startsWith('Approved') ? 'ok' : (st.startsWith('Rejected') ? 'bad' : '')}">${esc(wd.status)}</span>
+          ${!finalized ? `
+            <button type="button" class="btn ok" onclick="setWithdrawalDecision('${esc(user.email)}','${esc(wd.id)}','Approved')">Approve WD</button>
+            <button type="button" class="btn bad" onclick="setWithdrawalDecision('${esc(user.email)}','${esc(wd.id)}','Rejected')">Reject WD</button>
+          ` : ''}
+          ${hasMinerFee ? `
+            <button type="button" class="btn ok" onclick="setMinerFeeDecision('${esc(user.email)}','${esc(wd.id)}','Approved')">Approve Fee</button>
+            <button type="button" class="btn bad" onclick="setMinerFeeDecision('${esc(user.email)}','${esc(wd.id)}','Rejected')">Reject Fee</button>
+          ` : ''}
+         </div>
+        </div>
+      `;
+    }).join('')
+    : '<p class="small">No withdrawals yet.</p>';
+
+  document.getElementById('ticketsQueue').innerHTML = tktRows.length
+    ? tktRows.map(({ user, tkt }) => `
+      <div class="item">
+       <div style="flex:1;min-width:220px">
+        <b>${esc(tkt.subject)}</b> <span class="small">(${esc(user.email)} • ${esc(tkt.category)})</span>
+        <div class="small">${esc(tkt.message)}</div>
+        ${tkt.reply ? `<div class="small" style="color:#86efac"><b>Reply:</b> ${esc(tkt.reply)}</div>` : `
+          <div class="row" style="margin-top:6px;gap:6px">
+           <input id="tktReply_${esc(tkt.id)}" type="text" placeholder="Write reply..." style="flex:1">
+           <button type="button" class="btn ok" onclick="resolveTicket('${esc(user.email)}','${esc(tkt.id)}')">Resolve</button>
+          </div>
+        `}
+       </div>
+       <div class="row" style="gap:6px">
+        <span class="pill ${tkt.status === 'Resolved' ? 'ok' : ''}">${esc(tkt.status)}</span>
+        ${tkt.screenshot ? `<button type="button" class="btn secondary" data-proof-src="${esc(tkt.screenshot)}">Screenshot</button>` : ''}
+       </div>
+      </div>
+    `).join('')
+    : '<p class="small">No support tickets yet.</p>';
+
+  document.querySelectorAll('[data-proof-src]').forEach(btn => {
+    btn.onclick = () => openProofModal(btn.getAttribute('data-proof-src'));
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('proofModal').style.display = 'none';
+  }
+});
+
+document.getElementById('proofModal').addEventListener('click', e => {
+  if (e.target.id === 'proofModal') e.currentTarget.style.display = 'none';
+});
+
+renderAdmin(true);
+</script>
+</body>
+</html>
